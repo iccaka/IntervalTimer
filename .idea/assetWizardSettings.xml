@@ -59,7 +59,6 @@
                                       <entry key="backgroundColor" value="00a68b" />
                                       <entry key="backgroundImage" value="$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_background.xml" />
                                       <entry key="foregroundImage" value="$PROJECT_DIR$/app/src/main/res/drawable/logo192.png" />
-                                      <entry key="legacyIconShape" value="NONE" />
                                       <entry key="previewDensity" value="HIGH" />
                                       <entry key="showSafeZone" value="false" />
                                     </map>
