@@ -25,7 +25,6 @@ public class MainActivity extends Activity {
     private Button restMinusBtn;
     private Button restPlusBtn;
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +36,24 @@ public class MainActivity extends Activity {
         this.workPlusBtn = findViewById(R.id.workPlusBtn);
         this.restMinusBtn = findViewById(R.id.restMinusBtn);
         this.restPlusBtn = findViewById(R.id.restPlusBtn);
+
+        this.setsTextView = findViewById(R.id.setsQuantity);
+        this.workTextView = findViewById(R.id.workQuantity);
+        this.restTextView = findViewById(R.id.restQuantity);
+
+        this.sets = 12;
+        this.workSecs = 30;
+        this.workMins = 1;
+        this.restSecs = 30;
+        this.restMins = 0;
+
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    protected void onStart() {
+
+        super.onStart();
 
         this.setsPlusBtn.setOnTouchListener(new RepeatListener(600, 50, new View.OnClickListener() {
             @Override
@@ -79,16 +96,6 @@ public class MainActivity extends Activity {
                 restMinusBtn.performClick();
             }
         }));
-
-        this.setsTextView = findViewById(R.id.setsQuantity);
-        this.workTextView = findViewById(R.id.workQuantity);
-        this.restTextView = findViewById(R.id.restQuantity);
-
-        this.sets = 12;
-        this.workSecs = 30;
-        this.workMins = 1;
-        this.restSecs = 30;
-        this.restMins = 0;
 
         this.updateSets();
         this.updateWork();
