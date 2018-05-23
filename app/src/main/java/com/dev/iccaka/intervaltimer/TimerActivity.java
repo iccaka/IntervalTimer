@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 public class TimerActivity extends Activity {
 
-    //view from activity_timer
+    //views from activity_timer.xml
     private TextView trainingSetsQuantity;
     private TextView trainingWorkQuantity;
     private TextView trainingRestQuantity;
@@ -23,12 +23,14 @@ public class TimerActivity extends Activity {
     private Button pauseBtn;
     private Button continueBtn;
     private Button endBtn;
+    //========================================================
 
     //starting parameters that we get from the main activity
     private int startingWorkSecs;
     private int startingWorkMins;
     private int startingRestSecs;
     private int startingRestMins;
+    //========================================================
 
     //current parameters
     private int sets;
@@ -36,6 +38,7 @@ public class TimerActivity extends Activity {
     private int workMins;
     private int restSecs;
     private int restMins;
+    //========================================================
 
     //parameters when we stop, so we know where to continue from
     private int pausedSets;
@@ -43,10 +46,12 @@ public class TimerActivity extends Activity {
     private int pausedWorkMins;
     private int pausedRestSecs;
     private int pausedRestMins;
+    //========================================================
 
     //the two main timers
     private CountDownTimer workCountDownTimer;
     private CountDownTimer restCountDownTimer;
+    //========================================================
 
     //sounds when we press the buttons
     private MediaPlayer mpToWork;
@@ -54,10 +59,13 @@ public class TimerActivity extends Activity {
     private MediaPlayer mpToPause;
     private MediaPlayer mpToContinue;
     private MediaPlayer mpToEnd;
+    private MediaPlayer mpToFullyEnd;
+    //========================================================
 
     //booleans to see if the timer is working and if the timer has been paused
     private boolean isWorkOn;
     private boolean hasBeenPaused;
+    //========================================================
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,12 +74,6 @@ public class TimerActivity extends Activity {
 
         this.isWorkOn = true;
         this.hasBeenPaused = false;
-
-        this.mpToWork = MediaPlayer.create(this.getApplicationContext(), R.raw.beep9);
-        this.mpToRest = MediaPlayer.create(this.getApplicationContext(), R.raw.beep5);
-        this.mpToPause = MediaPlayer.create(this.getApplicationContext(), R.raw.button3);
-        this.mpToContinue = MediaPlayer.create(this.getApplicationContext(), R.raw.button5);
-        this.mpToEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.button8);
 
         this.continueBtn = findViewById(R.id.continueBtn);
         this.pauseBtn = findViewById(R.id.pauseBtn);
@@ -102,7 +104,19 @@ public class TimerActivity extends Activity {
         this.startingRestSecs = this.restSecs;
         this.startingRestMins = this.restMins;
 
-        //TODO fix the ContDownTimers and add the other functionality(end and pause timer)
+    }
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+
+        this.mpToWork = MediaPlayer.create(this.getApplicationContext(), R.raw.work);
+        this.mpToRest = MediaPlayer.create(this.getApplicationContext(), R.raw.rest);
+        this.mpToPause = MediaPlayer.create(this.getApplicationContext(), R.raw.pause);
+        this.mpToContinue = MediaPlayer.create(this.getApplicationContext(), R.raw.toContinue);
+        this.mpToEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.end);
+        this.mpToFullyEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.fullyEnd);
 
         this.updateSets();
         this.updateWork();
@@ -144,7 +158,6 @@ public class TimerActivity extends Activity {
 
 
         this.startWorkTimer();
-
     }
 
     @Override
@@ -261,6 +274,7 @@ public class TimerActivity extends Activity {
 
     }
 
+    //methods to properly increment the parameters
     private void decrementSets(View view) {
         if (this.sets > 1) {
             this.sets--;
@@ -308,7 +322,10 @@ public class TimerActivity extends Activity {
 
         this.updateRest();
     }
+    //========================================================
 
+
+    //custom methods to get the sets, workMins... on the screen
     @SuppressLint("SetTextI18n")
     private void updateSets() {
         if (this.sets > 9) {
@@ -344,6 +361,7 @@ public class TimerActivity extends Activity {
             this.trainingRestQuantity.setText("0" + this.restMins + " : 0" + this.restSecs);
         }
     }
+    //========================================================
 
     private void updatePausedFields() {
         this.pausedSets = this.sets;

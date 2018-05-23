@@ -10,11 +10,15 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
+    //current parameters
     private int sets;
     private int workMins;
     private int workSecs;
     private int restMins;
     private int restSecs;
+    //========================================================
+
+    //views from activity_main.xml
     private TextView setsTextView;
     private TextView workTextView;
     private TextView restTextView;
@@ -24,28 +28,32 @@ public class MainActivity extends Activity {
     private Button workPlusBtn;
     private Button restMinusBtn;
     private Button restPlusBtn;
+    //========================================================
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //get the views from the R class
         this.setsMinusBtn = findViewById(R.id.setsMinusBtn);
         this.setsPlusBtn = findViewById(R.id.setsPlusBtn);
         this.workMinusBtn = findViewById(R.id.workMinusBtn);
         this.workPlusBtn = findViewById(R.id.workPlusBtn);
         this.restMinusBtn = findViewById(R.id.restMinusBtn);
         this.restPlusBtn = findViewById(R.id.restPlusBtn);
-
         this.setsTextView = findViewById(R.id.setsQuantity);
         this.workTextView = findViewById(R.id.workQuantity);
         this.restTextView = findViewById(R.id.restQuantity);
+        //========================================================
 
+        //initialize the default values
         this.sets = 12;
         this.workSecs = 30;
         this.workMins = 1;
         this.restSecs = 30;
         this.restMins = 0;
+        //========================================================
 
     }
 
@@ -55,6 +63,7 @@ public class MainActivity extends Activity {
 
         super.onStart();
 
+        //attach listeners to all buttons
         this.setsPlusBtn.setOnTouchListener(new RepeatListener(600, 50, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,11 +106,13 @@ public class MainActivity extends Activity {
             }
         }));
 
+        //get the information on the screen via the custom methods
         this.updateSets();
         this.updateWork();
         this.updateRest();
     }
 
+    //custom methods to get the sets, workMins... on the screen
     private void updateSets() {
         if (this.sets > 9) {
             this.setsTextView.setText("  " + this.sets + "   ");
@@ -134,7 +145,9 @@ public class MainActivity extends Activity {
             this.restTextView.setText("0" + this.restMins + " : 0" + this.restSecs);
         }
     }
+    //========================================================
 
+    //methods to properly increment the parameters
     public void incrementSets(View view) {
         this.sets++;
 
@@ -224,7 +237,9 @@ public class MainActivity extends Activity {
 
         this.updateRest();
     }
+    //========================================================
 
+    //method to start the timer and pass the parameters to the TimerActivity class
     public void timerStart(View view) {
 
         Intent intent = new Intent(this, TimerActivity.class);
@@ -236,11 +251,6 @@ public class MainActivity extends Activity {
         intent.putExtra("restMins", this.restMins);
 
         startActivityForResult(intent, 0);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
 }
