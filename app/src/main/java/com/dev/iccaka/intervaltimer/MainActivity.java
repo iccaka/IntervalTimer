@@ -115,24 +115,12 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onRestart() {
-
-        super.onRestart();
-
-        Bundle extras = this.getIntent().getExtras();
-
-        this.sets = extras.getInt("sets");
-        this.workSecs = extras.getInt("workSecs");
-        this.workMins = extras.getInt("workMins");
-        this.restSecs = extras.getInt("restSecs");
-        this.restMins = extras.getInt("restMins");
-
-        this.onStart();
-
+    protected void onResume() {
+        super.onResume();
     }
 
-
     //custom methods to get the sets, workMins... on the screen
+    @SuppressLint("SetTextI18n")
     private void updateSets() {
         if (this.sets > 9) {
             this.setsTextView.setText("  " + this.sets + "   ");
@@ -142,6 +130,7 @@ public class MainActivity extends Activity {
         this.setsTextView.setText("  0" + this.sets + "   ");
     }
 
+    @SuppressLint("SetTextI18n")
     private void updateWork() {
         if (this.workMins > 9 && this.workSecs > 9) {
             this.workTextView.setText("" + this.workMins + " : " + this.workSecs);
@@ -154,6 +143,7 @@ public class MainActivity extends Activity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void updateRest() {
         if (this.restMins > 9 && this.restSecs > 9) {
             this.restTextView.setText("" + this.restMins + " : " + this.restSecs);

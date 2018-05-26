@@ -92,25 +92,11 @@ public class TimerActivity extends Activity {
 
         this.thisActivity.setBackgroundColor(Color.RED);
 
-        Bundle extras = this.getIntent().getExtras();
-        this.sets = extras.getInt("sets");
-        this.workSecs = extras.getInt("workSecs");
-        this.workMins = extras.getInt("workMins");
-        this.restSecs = extras.getInt("restSecs");
-        this.restMins = extras.getInt("restMins");
-
         this.startingSets = this.sets;
         this.startingWorkSecs = this.workSecs;
         this.startingWorkMins = this.workMins;
         this.startingRestSecs = this.restSecs;
         this.startingRestMins = this.restMins;
-
-    }
-
-    @Override
-    protected void onStart() {
-
-        super.onStart();
 
         this.mpToWork = MediaPlayer.create(this.getApplicationContext(), R.raw.work);
         this.mpToRest = MediaPlayer.create(this.getApplicationContext(), R.raw.rest);
@@ -119,11 +105,25 @@ public class TimerActivity extends Activity {
         this.mpToEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.end);
         this.mpToFullyEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.fullyend);
 
+        this.endBtn.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                endTimer(endBtn);
+                return false;
+            }
+        });
+    }
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+
         this.updateSets();
         this.updateWork();
         this.updateRest();
 
-        this.workCountDownTimer = new CountDownTimer((((this.workMins * 60) + this.workSecs) * 1000) + 1, 1000) {
+        this.workCountDownTimer = new CountDownTimer((((this.workMins * 60) + this.workSecs) * 1000) + 2, 1000) {
 
             @Override
             public void onTick(long millisUntilFinished) {
@@ -139,7 +139,7 @@ public class TimerActivity extends Activity {
             }
         };
 
-        this.restCountDownTimer = new CountDownTimer((((this.restMins * 60) + this.restSecs) * 1000) + 1, 1000) {
+        this.restCountDownTimer = new CountDownTimer((((this.restMins * 60) + this.restSecs) * 1000) + 2, 1000) {
 
             @Override
             public void onTick(long millisUntilFinished) {
@@ -159,6 +159,21 @@ public class TimerActivity extends Activity {
 
 
         this.startWorkTimer();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if(resultCode == RESULT_OK){
+            Bundle extras = this.getIntent().getExtras();
+            this.sets = extras.getInt("sets");
+            this.workSecs = extras.getInt("workSecs");
+            this.workMins = extras.getInt("workMins");
+            this.restSecs = extras.getInt("restSecs");
+            this.restMins = extras.getInt("restMins");
+
+            this.startWorkTimer();
+        }
     }
 
     @Override
@@ -195,21 +210,29 @@ public class TimerActivity extends Activity {
     }
 
     private void startRestTimer() {
-        this.thisActivity.setBackgroundColor(Color.GREEN);
 
-        this.mpToRest.start();
+        if(this.startingRestSecs > 0){
+            this.thisActivity.setBackgroundColor(Color.GREEN);
 
-        this.restSecs = this.startingRestSecs;
-        this.restMins = this.startingRestMins;
+            this.mpToRest.start();
 
-        this.trainingRestQuantity.setVisibility(View.VISIBLE);
-        this.trainingWorkQuantity.setVisibility(View.GONE);
+            this.restSecs = this.startingRestSecs;
+            this.restMins = this.startingRestMins;
 
-        this.trainingMotivationalText.setText("Rest now");
+            this.trainingRestQuantity.setVisibility(View.VISIBLE);
+            this.trainingWorkQuantity.setVisibility(View.GONE);
 
-        this.restCountDownTimer.start();
+            this.trainingMotivationalText.setText("Rest now");
+
+            this.restCountDownTimer.start();
+        }
+        else {
+
+        }
+
     }
 
+    //methods to continue, pause and end the timers
     public void continueTimer(View view) {
         this.mpToResume.start();
 
@@ -285,7 +308,10 @@ public class TimerActivity extends Activity {
     public void endTimer(View view) {
         this.mpToEnd.start();
 
+        this.onBackPressed();
+
     }
+    //========================================================
 
     //methods to properly increment the parameters
     private void decrementSets(View view) {
@@ -336,7 +362,6 @@ public class TimerActivity extends Activity {
         this.updateRest();
     }
     //========================================================
-
 
     //custom methods to get the sets, workMins... on the screen
     @SuppressLint("SetTextI18n")
