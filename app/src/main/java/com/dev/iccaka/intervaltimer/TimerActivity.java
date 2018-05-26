@@ -2,6 +2,7 @@ package com.dev.iccaka.intervaltimer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ public class TimerActivity extends Activity {
     //========================================================
 
     //starting parameters that we get from the main activity
+    private int startingSets;
     private int startingWorkSecs;
     private int startingWorkMins;
     private int startingRestSecs;
@@ -57,7 +59,7 @@ public class TimerActivity extends Activity {
     private MediaPlayer mpToWork;
     private MediaPlayer mpToRest;
     private MediaPlayer mpToPause;
-    private MediaPlayer mpToContinue;
+    private MediaPlayer mpToResume;
     private MediaPlayer mpToEnd;
     private MediaPlayer mpToFullyEnd;
     //========================================================
@@ -78,27 +80,26 @@ public class TimerActivity extends Activity {
         this.continueBtn = findViewById(R.id.continueBtn);
         this.pauseBtn = findViewById(R.id.pauseBtn);
         this.endBtn = findViewById(R.id.endBtn);
-
-        this.endBtn.setVisibility(View.GONE);
-        this.continueBtn.setVisibility(View.GONE);
-
         this.thisActivity = findViewById(R.id.timerActivity);
-        this.thisActivity.setBackgroundColor(Color.RED);
-
         this.trainingSetsQuantity = findViewById(R.id.trainingSetsQuantity);
         this.trainingWorkQuantity = findViewById(R.id.trainingWorkQuantity);
         this.trainingRestQuantity = findViewById(R.id.trainingRestQuantity);
         this.trainingMotivationalText = findViewById(R.id.trainingMotivationalText);
 
+        this.endBtn.setVisibility(View.GONE);
+        this.continueBtn.setVisibility(View.GONE);
         this.trainingRestQuantity.setVisibility(View.GONE);
 
-        Bundle extras = getIntent().getExtras();
+        this.thisActivity.setBackgroundColor(Color.RED);
+
+        Bundle extras = this.getIntent().getExtras();
         this.sets = extras.getInt("sets");
         this.workSecs = extras.getInt("workSecs");
         this.workMins = extras.getInt("workMins");
         this.restSecs = extras.getInt("restSecs");
         this.restMins = extras.getInt("restMins");
 
+        this.startingSets = this.sets;
         this.startingWorkSecs = this.workSecs;
         this.startingWorkMins = this.workMins;
         this.startingRestSecs = this.restSecs;
@@ -114,9 +115,9 @@ public class TimerActivity extends Activity {
         this.mpToWork = MediaPlayer.create(this.getApplicationContext(), R.raw.work);
         this.mpToRest = MediaPlayer.create(this.getApplicationContext(), R.raw.rest);
         this.mpToPause = MediaPlayer.create(this.getApplicationContext(), R.raw.pause);
-        this.mpToContinue = MediaPlayer.create(this.getApplicationContext(), R.raw.toContinue);
+        this.mpToResume = MediaPlayer.create(this.getApplicationContext(), R.raw.resume);
         this.mpToEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.end);
-        this.mpToFullyEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.fullyEnd);
+        this.mpToFullyEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.fullyend);
 
         this.updateSets();
         this.updateWork();
@@ -162,7 +163,19 @@ public class TimerActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        this.mpToWork.start();
+
+        Intent intent = new Intent(this, MainActivity.class);
+
+        intent.putExtra("sets", this.startingSets);
+        intent.putExtra("workSecs", this.startingWorkSecs);
+        intent.putExtra("workMins", this.startingWorkMins);
+        intent.putExtra("restSecs", this.startingRestSecs);
+        intent.putExtra("restMins", this.startingRestMins);
+
+        startActivity(intent);
+
+        this.finish();
+
     }
 
     private void startWorkTimer() {
@@ -198,7 +211,7 @@ public class TimerActivity extends Activity {
     }
 
     public void continueTimer(View view) {
-        this.mpToContinue.start();
+        this.mpToResume.start();
 
         if (this.isWorkOn) {
             this.workCountDownTimer = new CountDownTimer((((this.pausedWorkMins * 60) + this.pausedWorkSecs) * 1000) + 1, 1000) {

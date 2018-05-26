@@ -30,6 +30,7 @@ public class MainActivity extends Activity {
     private Button restPlusBtn;
     //========================================================
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,22 +47,6 @@ public class MainActivity extends Activity {
         this.workTextView = findViewById(R.id.workQuantity);
         this.restTextView = findViewById(R.id.restQuantity);
         //========================================================
-
-        //initialize the default values
-        this.sets = 12;
-        this.workSecs = 30;
-        this.workMins = 1;
-        this.restSecs = 30;
-        this.restMins = 0;
-        //========================================================
-
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    protected void onStart() {
-
-        super.onStart();
 
         //attach listeners to all buttons
         this.setsPlusBtn.setOnTouchListener(new RepeatListener(600, 50, new View.OnClickListener() {
@@ -105,12 +90,47 @@ public class MainActivity extends Activity {
                 restMinusBtn.performClick();
             }
         }));
+        //========================================================
+
+    }
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+
+        //initialize the default values
+        this.sets = 12;
+        this.workSecs = 30;
+        this.workMins = 1;
+        this.restSecs = 30;
+        this.restMins = 0;
+        //========================================================
 
         //get the information on the screen via the custom methods
         this.updateSets();
         this.updateWork();
         this.updateRest();
+        //========================================================
     }
+
+    @Override
+    protected void onRestart() {
+
+        super.onRestart();
+
+        Bundle extras = this.getIntent().getExtras();
+
+        this.sets = extras.getInt("sets");
+        this.workSecs = extras.getInt("workSecs");
+        this.workMins = extras.getInt("workMins");
+        this.restSecs = extras.getInt("restSecs");
+        this.restMins = extras.getInt("restMins");
+
+        this.onStart();
+
+    }
+
 
     //custom methods to get the sets, workMins... on the screen
     private void updateSets() {
@@ -250,7 +270,7 @@ public class MainActivity extends Activity {
         intent.putExtra("restSecs", this.restSecs);
         intent.putExtra("restMins", this.restMins);
 
-        startActivityForResult(intent, 0);
+        startActivity(intent);
     }
 
 }
