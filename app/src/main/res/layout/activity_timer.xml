@@ -83,7 +83,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_weight="1"
-                android:onClick="endTimer"
                 android:text="Hold To End"
                 android:textAllCaps="true" />
         </LinearLayout>
