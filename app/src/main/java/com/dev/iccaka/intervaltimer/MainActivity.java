@@ -114,11 +114,6 @@ public class MainActivity extends Activity {
         //========================================================
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
     //custom methods to get the sets, workMins... on the screen
     @SuppressLint("SetTextI18n")
     private void updateSets() {

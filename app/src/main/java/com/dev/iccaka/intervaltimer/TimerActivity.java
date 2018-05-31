@@ -2,12 +2,17 @@ package com.dev.iccaka.intervaltimer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -112,6 +117,8 @@ public class TimerActivity extends Activity {
                 return false;
             }
         });
+
+        this.createNotificationChannel();
     }
 
     @Override
@@ -176,23 +183,19 @@ public class TimerActivity extends Activity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
+    private void createNotificationChannel() {
 
-        Intent intent = new Intent(this, MainActivity.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-        intent.putExtra("sets", this.startingSets);
-        intent.putExtra("workSecs", this.startingWorkSecs);
-        intent.putExtra("workMins", this.startingWorkMins);
-        intent.putExtra("restSecs", this.startingRestSecs);
-        intent.putExtra("restMins", this.startingRestMins);
+            NotificationChannel channel = new NotificationChannel("oneAndOnly", "Timer", NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription("The main timer");
 
-        startActivity(intent);
-
-        this.finish();
-
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
+    //methods to starts the 2 timers
     private void startWorkTimer() {
         this.thisActivity.setBackgroundColor(Color.RED);
 
@@ -230,6 +233,103 @@ public class TimerActivity extends Activity {
 
         }
 
+    }
+    //========================================================
+
+    //methods to properly increment the parameters
+    private void decrementWork(View view) {
+        if (this.workMins == 0 && this.workSecs == 1) {
+            return;
+        }
+
+        if (this.workSecs >= 0) {
+            this.workSecs--;
+
+            if (this.workSecs == -1) {
+                this.workSecs = 59;
+                this.workMins--;
+
+                if (this.workMins == -1) {
+                    this.workSecs = 0;
+                    this.workMins = 0;
+                }
+            }
+        }
+
+        this.updateWork();
+    }
+
+    private void decrementRest(View view) {
+        if (this.restSecs >= 0) {
+            this.restSecs--;
+
+            if (this.restSecs == -1) {
+                this.restSecs = 59;
+                this.restMins--;
+
+                if (this.restMins == -1) {
+                    this.restSecs = 0;
+                    this.restMins = 0;
+                }
+            }
+        }
+
+        this.updateRest();
+    }
+
+    private void decrementSets(View view) {
+        if (this.sets > 1) {
+            this.sets--;
+        }
+
+        this.updateSets();
+    }
+    //========================================================
+
+    //custom methods to get the sets, workMins... on the screen
+    @SuppressLint("SetTextI18n")
+    private void updateSets() {
+        if (this.sets > 9) {
+            this.trainingSetsQuantity.setText("" + this.sets);
+            return;
+        }
+
+        this.trainingSetsQuantity.setText("0" + this.sets);
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateWork() {
+        if (this.workMins > 9 && this.workSecs > 9) {
+            this.trainingWorkQuantity.setText("" + this.workMins + " : " + this.workSecs);
+        } else if (this.workMins > 9 && this.workSecs <= 9) {
+            this.trainingWorkQuantity.setText("" + this.workMins + " : 0" + this.workSecs);
+        } else if (this.workMins <= 9 && this.workSecs > 9) {
+            this.trainingWorkQuantity.setText("0" + this.workMins + " : " + this.workSecs);
+        } else {
+            this.trainingWorkQuantity.setText("0" + this.workMins + " : 0" + this.workSecs);
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateRest() {
+        if (this.restMins > 9 && this.restSecs > 9) {
+            this.trainingRestQuantity.setText("" + this.restMins + " : " + this.restSecs);
+        } else if (this.restMins > 9 && this.restSecs <= 9) {
+            this.trainingRestQuantity.setText("" + this.restMins + " : 0" + this.restSecs);
+        } else if (this.restMins <= 9 && this.restSecs > 9) {
+            this.trainingRestQuantity.setText("0" + this.restMins + " : " + this.restSecs);
+        } else {
+            this.trainingRestQuantity.setText("0" + this.restMins + " : 0" + this.restSecs);
+        }
+    }
+    //========================================================
+
+    private void updatePausedFields() {
+        this.pausedSets = this.sets;
+        this.pausedWorkSecs = this.workSecs;
+        this.pausedWorkMins = this.workMins;
+        this.pausedRestSecs = this.restSecs;
+        this.pausedRestMins = this.restMins;
     }
 
     //methods to continue, pause and end the timers
@@ -313,100 +413,13 @@ public class TimerActivity extends Activity {
     }
     //========================================================
 
-    //methods to properly increment the parameters
-    private void decrementSets(View view) {
-        if (this.sets > 1) {
-            this.sets--;
-        }
+    @Override
+    public void onBackPressed() {
 
-        this.updateSets();
-    }
+        this.finish();
 
-    private void decrementWork(View view) {
-        if (this.workMins == 0 && this.workSecs == 1) {
-            return;
-        }
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "a");
 
-        if (this.workSecs >= 0) {
-            this.workSecs--;
-
-            if (this.workSecs == -1) {
-                this.workSecs = 59;
-                this.workMins--;
-
-                if (this.workMins == -1) {
-                    this.workSecs = 0;
-                    this.workMins = 0;
-                }
-            }
-        }
-
-        this.updateWork();
-    }
-
-    private void decrementRest(View view) {
-        if (this.restSecs >= 0) {
-            this.restSecs--;
-
-            if (this.restSecs == -1) {
-                this.restSecs = 59;
-                this.restMins--;
-
-                if (this.restMins == -1) {
-                    this.restSecs = 0;
-                    this.restMins = 0;
-                }
-            }
-        }
-
-        this.updateRest();
-    }
-    //========================================================
-
-    //custom methods to get the sets, workMins... on the screen
-    @SuppressLint("SetTextI18n")
-    private void updateSets() {
-        if (this.sets > 9) {
-            this.trainingSetsQuantity.setText("" + this.sets);
-            return;
-        }
-
-        this.trainingSetsQuantity.setText("0" + this.sets);
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void updateWork() {
-        if (this.workMins > 9 && this.workSecs > 9) {
-            this.trainingWorkQuantity.setText("" + this.workMins + " : " + this.workSecs);
-        } else if (this.workMins > 9 && this.workSecs <= 9) {
-            this.trainingWorkQuantity.setText("" + this.workMins + " : 0" + this.workSecs);
-        } else if (this.workMins <= 9 && this.workSecs > 9) {
-            this.trainingWorkQuantity.setText("0" + this.workMins + " : " + this.workSecs);
-        } else {
-            this.trainingWorkQuantity.setText("0" + this.workMins + " : 0" + this.workSecs);
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void updateRest() {
-        if (this.restMins > 9 && this.restSecs > 9) {
-            this.trainingRestQuantity.setText("" + this.restMins + " : " + this.restSecs);
-        } else if (this.restMins > 9 && this.restSecs <= 9) {
-            this.trainingRestQuantity.setText("" + this.restMins + " : 0" + this.restSecs);
-        } else if (this.restMins <= 9 && this.restSecs > 9) {
-            this.trainingRestQuantity.setText("0" + this.restMins + " : " + this.restSecs);
-        } else {
-            this.trainingRestQuantity.setText("0" + this.restMins + " : 0" + this.restSecs);
-        }
-    }
-    //========================================================
-
-    private void updatePausedFields() {
-        this.pausedSets = this.sets;
-        this.pausedWorkSecs = this.workSecs;
-        this.pausedWorkMins = this.workMins;
-        this.pausedRestSecs = this.restSecs;
-        this.pausedRestMins = this.restMins;
     }
 
 }
