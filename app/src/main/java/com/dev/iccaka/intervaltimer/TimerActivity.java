@@ -2,7 +2,6 @@ package com.dev.iccaka.intervaltimer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
@@ -188,7 +187,7 @@ public class TimerActivity extends Activity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             NotificationChannel channel = new NotificationChannel("oneAndOnly", "Timer", NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription("The main timer");
+            channel.setDescription("Timer");
 
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
@@ -418,7 +417,13 @@ public class TimerActivity extends Activity {
 
         this.finish();
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "a");
+        Intent intent = new Intent(this, TimerActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
+                .setAutoCancel(true)
+                .setPriority(NotificationManager.IMPORTANCE_HIGH)
+                .setContentIntent()
 
     }
 
