@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -418,12 +420,19 @@ public class TimerActivity extends Activity {
         this.finish();
 
         Intent intent = new Intent(this, TimerActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
+                .setSmallIcon(R.drawable.ic_stat_paused_app)
+                .setContentTitle("test title")
+                .setContentText("test text")
                 .setAutoCancel(true)
                 .setPriority(NotificationManager.IMPORTANCE_HIGH)
-                .setContentIntent()
+                .setContentIntent(pendingIntent);  // Open this activity when pressed
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify("oneAndOnly", 1,  mBuilder.build());
 
     }
 
