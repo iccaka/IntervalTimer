@@ -2,15 +2,23 @@ package com.dev.iccaka.intervaltimer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class MainActivity extends Activity {
 
-    //current parameters
+    // Current parameters
     private int sets;
     private int workMins;
     private int workSecs;
@@ -18,7 +26,7 @@ public class MainActivity extends Activity {
     private int restSecs;
     //========================================================
 
-    //views from activity_main.xml
+    // Views from activity_main.xml
     private TextView setsTextView;
     private TextView workTextView;
     private TextView restTextView;
@@ -114,7 +122,7 @@ public class MainActivity extends Activity {
         //========================================================
     }
 
-    //custom methods to get the sets, workMins... on the screen
+    // Custom methods to get the sets, workMins... on the screen
     @SuppressLint("SetTextI18n")
     private void updateSets() {
         if (this.sets > 9) {
@@ -152,7 +160,7 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    //methods to properly increment the parameters
+    // Methods to properly increment the parameters
     public void incrementSets(View view) {
         this.sets++;
 
@@ -244,8 +252,14 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    //method to start the timer and pass the parameters to the TimerActivity class
-    public void timerStart(View view) {
+    public void timerStart(View view) throws IOException {  // Method to start the timer and pass the parameters to the TimerActivity class
+
+        FileOutputStream fos = openFileOutput("raw/properties", Context.MODE_PRIVATE);
+
+        String data = this.sets + " " + this.workSecs + " " + this.workMins + " " + this.restSecs + " " + this.restMins;
+
+        fos.write(data.getBytes());
+        fos.close();
 
         Intent intent = new Intent(this, TimerActivity.class);
 

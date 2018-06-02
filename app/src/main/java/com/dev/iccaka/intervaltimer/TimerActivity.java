@@ -11,6 +11,7 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -21,7 +22,7 @@ import android.widget.TextView;
 
 public class TimerActivity extends Activity {
 
-    //views from activity_timer.xml
+    // Views from activity_timer.xml
     private TextView trainingSetsQuantity;
     private TextView trainingWorkQuantity;
     private TextView trainingRestQuantity;
@@ -32,7 +33,7 @@ public class TimerActivity extends Activity {
     private Button endBtn;
     //========================================================
 
-    //starting parameters that we get from the main activity
+    // Starting parameters that we get from the main activity
     private int startingSets;
     private int startingWorkSecs;
     private int startingWorkMins;
@@ -40,7 +41,7 @@ public class TimerActivity extends Activity {
     private int startingRestMins;
     //========================================================
 
-    //current parameters
+    // Current parameters
     private int sets;
     private int workSecs;
     private int workMins;
@@ -48,7 +49,7 @@ public class TimerActivity extends Activity {
     private int restMins;
     //========================================================
 
-    //parameters when we stop, so we know where to continue from
+    // Parameters when we stop, so we know where to continue from
     private int pausedSets;
     private int pausedWorkSecs;
     private int pausedWorkMins;
@@ -56,12 +57,12 @@ public class TimerActivity extends Activity {
     private int pausedRestMins;
     //========================================================
 
-    //the two main timers
+    // The two main timers
     private CountDownTimer workCountDownTimer;
     private CountDownTimer restCountDownTimer;
     //========================================================
 
-    //sounds when we press the buttons
+    // Sounds when we press the buttons
     private MediaPlayer mpToWork;
     private MediaPlayer mpToRest;
     private MediaPlayer mpToPause;
@@ -70,13 +71,13 @@ public class TimerActivity extends Activity {
     private MediaPlayer mpToFullyEnd;
     //========================================================
 
-    //booleans to see if the timer is working and if the timer has been paused
+    // Booleans to see if the timer is working and if the timer has been paused
     private boolean isWorkOn;
     private boolean hasBeenPaused;
     //========================================================
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer);
 
@@ -97,6 +98,19 @@ public class TimerActivity extends Activity {
         this.trainingRestQuantity.setVisibility(View.GONE);
 
         this.thisActivity.setBackgroundColor(Color.RED);
+
+        Bundle mainActivityBundle = getIntent().getExtras();
+
+//        if(savedInstanceState == null){
+            this.sets = mainActivityBundle.getInt("sets");
+            this.workSecs = mainActivityBundle.getInt("workSecs");
+            this.workMins = mainActivityBundle.getInt("workMins");
+            this.restSecs = mainActivityBundle.getInt("restSecs");
+            this.restMins = mainActivityBundle.getInt("restMins");
+        /*}
+        else{
+
+        }*/
 
         this.startingSets = this.sets;
         this.startingWorkSecs = this.workSecs;
@@ -123,8 +137,18 @@ public class TimerActivity extends Activity {
     }
 
     @Override
-    protected void onStart() {
+    protected void onSaveInstanceState(Bundle outState) {
 
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+
+
+    }
+
+    @Override
+    protected void onStart() {
         super.onStart();
 
         this.updateSets();
@@ -169,21 +193,6 @@ public class TimerActivity extends Activity {
         this.startWorkTimer();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        if(resultCode == RESULT_OK){
-            Bundle extras = this.getIntent().getExtras();
-            this.sets = extras.getInt("sets");
-            this.workSecs = extras.getInt("workSecs");
-            this.workMins = extras.getInt("workMins");
-            this.restSecs = extras.getInt("restSecs");
-            this.restMins = extras.getInt("restMins");
-
-            this.startWorkTimer();
-        }
-    }
-
     private void createNotificationChannel() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -196,7 +205,7 @@ public class TimerActivity extends Activity {
         }
     }
 
-    //methods to starts the 2 timers
+    // Methods to starts the 2 timers
     private void startWorkTimer() {
         this.thisActivity.setBackgroundColor(Color.RED);
 
@@ -237,7 +246,7 @@ public class TimerActivity extends Activity {
     }
     //========================================================
 
-    //methods to properly increment the parameters
+    // Methods to properly increment the parameters
     private void decrementWork(View view) {
         if (this.workMins == 0 && this.workSecs == 1) {
             return;
@@ -287,7 +296,7 @@ public class TimerActivity extends Activity {
     }
     //========================================================
 
-    //custom methods to get the sets, workMins... on the screen
+    // Custom methods to get the sets, workMins... on the screen
     @SuppressLint("SetTextI18n")
     private void updateSets() {
         if (this.sets > 9) {
@@ -333,7 +342,7 @@ public class TimerActivity extends Activity {
         this.pausedRestMins = this.restMins;
     }
 
-    //methods to continue, pause and end the timers
+    // Methods to continue, pause and end the timers
     public void continueTimer(View view) {
         this.mpToResume.start();
 
@@ -417,6 +426,9 @@ public class TimerActivity extends Activity {
     @Override
     public void onBackPressed() {
 
+        this.workCountDownTimer.cancel();
+        this.restCountDownTimer.cancel();
+
         this.finish();
 
         Intent intent = new Intent(this, TimerActivity.class);
@@ -425,14 +437,15 @@ public class TimerActivity extends Activity {
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
                 .setSmallIcon(R.drawable.ic_stat_paused_app)
-                .setContentTitle("test title")
-                .setContentText("test text")
+                .setContentTitle("Sample title")
+                .setContentText("Sample text")
                 .setAutoCancel(true)
                 .setPriority(NotificationManager.IMPORTANCE_HIGH)
-                .setContentIntent(pendingIntent);  // Open this activity when pressed
+                .setContentIntent(pendingIntent);  // Open this activity when the notification is pressed
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify("oneAndOnly", 1,  mBuilder.build());
+
 
     }
 
