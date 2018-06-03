@@ -296,7 +296,7 @@ public class TimerActivity extends Activity {
     }
     //========================================================
 
-    // Custom methods to get the sets, workMins... on the screen
+    // Custom methods to get the parameters on the screen
     @SuppressLint("SetTextI18n")
     private void updateSets() {
         if (this.sets > 9) {
