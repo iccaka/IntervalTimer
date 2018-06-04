@@ -2,19 +2,25 @@ package com.dev.iccaka.intervaltimer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+
 
 public class MainActivity extends Activity {
 
@@ -38,9 +44,12 @@ public class MainActivity extends Activity {
     private Button restPlusBtn;
     //========================================================
 
+    private BufferedReader bufferedReader;
+//    private BufferedWriter bufferedWriter;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -56,6 +65,18 @@ public class MainActivity extends Activity {
         this.restTextView = findViewById(R.id.restQuantity);
         //========================================================
 
+        try {
+            this.bufferedReader = new BufferedReader(new InputStreamReader(this.getAssets().open("parameters")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+//        try {
+//            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
         //attach listeners to all buttons
         this.setsPlusBtn.setOnTouchListener(new RepeatListener(600, 50, new View.OnClickListener() {
             @Override
@@ -63,35 +84,30 @@ public class MainActivity extends Activity {
                 setsPlusBtn.performClick();
             }
         }));
-
         this.setsMinusBtn.setOnTouchListener(new RepeatListener(600, 50, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 setsMinusBtn.performClick();
             }
         }));
-
         this.workPlusBtn.setOnTouchListener(new RepeatListener(600, 25, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 workPlusBtn.performClick();
             }
         }));
-
         this.workMinusBtn.setOnTouchListener(new RepeatListener(600, 25, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 workMinusBtn.performClick();
             }
         }));
-
         this.restPlusBtn.setOnTouchListener(new RepeatListener(600, 25, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 restPlusBtn.performClick();
             }
         }));
-
         this.restMinusBtn.setOnTouchListener(new RepeatListener(600, 25, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -115,6 +131,8 @@ public class MainActivity extends Activity {
         this.restMins = 0;
         //========================================================
 
+        this.setParameters();
+
         //get the information on the screen via the custom methods
         this.updateSets();
         this.updateWork();
@@ -122,7 +140,64 @@ public class MainActivity extends Activity {
         //========================================================
     }
 
-    // Custom methods to get the sets, workMins... on the screen
+    private ArrayList<Integer> getParameters() {
+        ArrayList<Integer> parameters = new ArrayList<>();
+
+        parameters.add(this.sets);
+        parameters.add(this.workSecs);
+        parameters.add(this.workMins);
+        parameters.add(this.restSecs);
+        parameters.add(this.restMins);
+
+        return parameters;
+    }
+
+    private void setParameters() {
+        ArrayList<Integer> parameters = this.readParameters();
+
+        this.sets = parameters.get(0);
+        this.workSecs = parameters.get(1);
+        this.workMins = parameters.get(2);
+        this.restSecs = parameters.get(3);
+        this.restMins = parameters.get(4);
+    }
+
+    private ArrayList<Integer> readParameters() {
+
+        ArrayList<Integer> parameters = new ArrayList<>();
+
+        try {
+            String[] result = this.bufferedReader.readLine().split(" ");
+            this.bufferedReader.close();
+
+            for (String a : result) {
+                parameters.add(Integer.parseInt(a));
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return parameters;
+    }
+
+//    private void writeParameters() {
+//        ArrayList<Integer> parameters = this.getParameters();
+//
+//        try {
+//            StringBuilder result = new StringBuilder();
+//            for (int a : parameters) {
+//                result.append(a).append(" ");
+//            }
+//
+//            this.bufferedWriter.write(result.toString());
+//            this.bufferedWriter.close();
+//        } catch (IOException ioe) {
+//            ioe.printStackTrace();
+//        }
+//    }
+
+    // Custom methods to get the parameters on the screen
     @SuppressLint("SetTextI18n")
     private void updateSets() {
         if (this.sets > 9) {
@@ -252,14 +327,9 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    public void timerStart(View view) throws IOException {  // Method to start the timer and pass the parameters to the TimerActivity class
+    public void timerStart(View view) {  // Method to start the timer and pass the parameters to the TimerActivity class
 
-        FileOutputStream fos = openFileOutput("raw/properties", Context.MODE_PRIVATE);
-
-        String data = this.sets + " " + this.workSecs + " " + this.workMins + " " + this.restSecs + " " + this.restMins;
-
-        fos.write(data.getBytes());
-        fos.close();
+//        this.writeParameters();
 
         Intent intent = new Intent(this, TimerActivity.class);
 
@@ -271,5 +341,4 @@ public class MainActivity extends Activity {
 
         startActivity(intent);
     }
-
 }
