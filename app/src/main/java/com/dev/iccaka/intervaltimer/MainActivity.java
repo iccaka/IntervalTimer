@@ -74,13 +74,13 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
 
-        try {
-            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.getAssets().openFd()));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.getAssets().openFd()));
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
 
         
