@@ -2,6 +2,7 @@ package com.dev.iccaka.intervaltimer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -13,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,7 +47,7 @@ public class MainActivity extends Activity {
     //========================================================
 
     private BufferedReader bufferedReader;
-//    private BufferedWriter bufferedWriter;
+    private BufferedWriter bufferedWriter;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -67,15 +69,18 @@ public class MainActivity extends Activity {
 
         try {
             this.bufferedReader = new BufferedReader(new InputStreamReader(this.getAssets().open("parameters")));
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
 
-//        try {
-//            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.getAssets().openFd()));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
         
@@ -183,21 +188,21 @@ public class MainActivity extends Activity {
         return parameters;
     }
 
-//    private void writeParameters() {
-//        ArrayList<Integer> parameters = this.getParameters();
-//
-//        try {
-//            StringBuilder result = new StringBuilder();
-//            for (int a : parameters) {
-//                result.append(a).append(" ");
-//            }
-//
-//            this.bufferedWriter.write(result.toString());
-//            this.bufferedWriter.close();
-//        } catch (IOException ioe) {
-//            ioe.printStackTrace();
-//        }
-//    }
+    private void writeParameters() {
+        ArrayList<Integer> parameters = this.getParameters();
+
+        try {
+            StringBuilder result = new StringBuilder();
+            for (int a : parameters) {
+                result.append(a).append(" ");
+            }
+
+            this.bufferedWriter.write(result.toString());
+
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
 
     // Custom methods to get the parameters on the screen
     @SuppressLint("SetTextI18n")
@@ -237,7 +242,7 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    // Methods to properly increment the parameters
+    // Methods to properly increment the parameters when you click on their corresponding buttons
     public void incrementSets(View view) {
         this.sets++;
 
@@ -331,7 +336,7 @@ public class MainActivity extends Activity {
 
     public void timerStart(View view) {  // Method to start the timer and pass the parameters to the TimerActivity class
 
-//        this.writeParameters();
+        this.writeParameters();
 
         Intent intent = new Intent(this, TimerActivity.class);
 

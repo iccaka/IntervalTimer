@@ -246,7 +246,7 @@ public class TimerActivity extends Activity {
     }
     //========================================================
 
-    // Methods to properly increment the parameters
+    // Methods to properly increment the parameters when you click on their corresponding buttons
     private void decrementWork(View view) {
         if (this.workMins == 0 && this.workSecs == 1) {
             return;
