@@ -148,18 +148,6 @@ public class MainActivity extends Activity {
     }
 
     // Methods to read/write the parameters to the corresponding file
-    private ArrayList<Integer> getParameters() {
-        ArrayList<Integer> parameters = new ArrayList<>();
-
-        parameters.add(this.sets);
-        parameters.add(this.workSecs);
-        parameters.add(this.workMins);
-        parameters.add(this.restSecs);
-        parameters.add(this.restMins);
-
-        return parameters;
-    }
-
     private void setParameters() {
         ArrayList<Integer> parameters = this.readParameters();
 
@@ -181,6 +169,18 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return parameters;
+    }
+
+    private ArrayList<Integer> getParameters() {
+        ArrayList<Integer> parameters = new ArrayList<>();
+
+        parameters.add(this.sets);
+        parameters.add(this.workSecs);
+        parameters.add(this.workMins);
+        parameters.add(this.restSecs);
+        parameters.add(this.restMins);
 
         return parameters;
     }
