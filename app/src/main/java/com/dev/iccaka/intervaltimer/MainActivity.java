@@ -147,6 +147,7 @@ public class MainActivity extends Activity {
         //========================================================
     }
 
+    // Methods to read/write the parameters to the corresponding file
     private ArrayList<Integer> getParameters() {
         ArrayList<Integer> parameters = new ArrayList<>();
 
@@ -174,14 +175,10 @@ public class MainActivity extends Activity {
         ArrayList<Integer> parameters = new ArrayList<>();
 
         try {
-            String[] result = this.bufferedReader.readLine().split(" ");
-            this.bufferedReader.close();
 
-            for (String a : result) {
-                parameters.add(Integer.parseInt(a));
-            }
+            //TODO Read the parameters from the 'parameters' file inside the 'res' folder
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -193,16 +190,18 @@ public class MainActivity extends Activity {
 
         try {
             StringBuilder result = new StringBuilder();
+
             for (int a : parameters) {
                 result.append(a).append(" ");
             }
 
-            this.bufferedWriter.write(result.toString());
+            //TODO Write the parameters to the 'parameters' file inside the 'res' folder
 
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+    //========================================================
 
     // Custom methods to get the parameters on the screen
     @SuppressLint("SetTextI18n")
@@ -334,7 +333,8 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    public void timerStart(View view) {  // Method to start the timer and pass the parameters to the TimerActivity class
+    // Method to start the timer and pass the parameters to the TimerActivity class
+    public void timerStart(View view) {
 
         this.writeParameters();
 
