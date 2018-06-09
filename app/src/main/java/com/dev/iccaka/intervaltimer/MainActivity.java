@@ -55,6 +55,14 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //initialize the default values
+        this.sets = 12;
+        this.workSecs = 30;
+        this.workMins = 1;
+        this.restSecs = 30;
+        this.restMins = 0;
+        //========================================================
+
         //get the views from the R class
         this.setsMinusBtn = findViewById(R.id.setsMinusBtn);
         this.setsPlusBtn = findViewById(R.id.setsPlusBtn);
@@ -67,21 +75,11 @@ public class MainActivity extends Activity {
         this.restTextView = findViewById(R.id.restQuantity);
         //========================================================
 
-        try {
-            this.bufferedReader = new BufferedReader(new InputStreamReader(this.getAssets().open("parameters")));
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
 
-//        try {
-//            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.getAssets().openFd()));
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
 
+
+
+        //TODO Initialize 'bufferedReader' and 'bufferedWriter'
 
         
         //attach listeners to all buttons
@@ -130,14 +128,7 @@ public class MainActivity extends Activity {
 
         super.onStart();
 
-        //initialize the default values
-        this.sets = 12;
-        this.workSecs = 30;
-        this.workMins = 1;
-        this.restSecs = 30;
-        this.restMins = 0;
-        //========================================================
-
+        //set the parameters by reading their values from the 'parameters' file
         this.setParameters();
 
         //get the information on the screen via the custom methods
@@ -164,7 +155,7 @@ public class MainActivity extends Activity {
 
         try {
 
-            //TODO Read the parameters from the 'parameters' file inside the 'res' folder
+            //TODO Read the parameters from the 'parameters' file
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -195,7 +186,7 @@ public class MainActivity extends Activity {
                 result.append(a).append(" ");
             }
 
-            //TODO Write the parameters to the 'parameters' file inside the 'res' folder
+            //TODO Write the parameters to the 'parameters' file
 
         } catch (Exception e) {
             e.printStackTrace();
