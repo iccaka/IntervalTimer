@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -16,6 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -48,6 +50,7 @@ public class MainActivity extends Activity {
 
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
+    private static final String DEFAULT_FILE_NAME = "parameters";
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -75,13 +78,6 @@ public class MainActivity extends Activity {
         this.restTextView = findViewById(R.id.restQuantity);
         //========================================================
 
-
-
-
-
-        //TODO Initialize 'bufferedReader' and 'bufferedWriter'
-
-        
         //attach listeners to all buttons
         this.setsPlusBtn.setOnTouchListener(new RepeatListener(600, 50, new View.OnClickListener() {
             @Override
@@ -140,28 +136,13 @@ public class MainActivity extends Activity {
 
     // Methods to read/write the parameters to the corresponding file
     private void setParameters() {
-        ArrayList<Integer> parameters = this.readParameters();
-
-        this.sets = parameters.get(0);
-        this.workSecs = parameters.get(1);
-        this.workMins = parameters.get(2);
-        this.restSecs = parameters.get(3);
-        this.restMins = parameters.get(4);
-    }
-
-    private ArrayList<Integer> readParameters() {
-
-        ArrayList<Integer> parameters = new ArrayList<>();
-
-        try {
-
-            //TODO Read the parameters from the 'parameters' file
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return parameters;
+//        ArrayList<Integer> parameters = this.readParameters();
+//
+//        this.sets = parameters.get(0);
+//        this.workSecs = parameters.get(1);
+//        this.workMins = parameters.get(2);
+//        this.restSecs = parameters.get(3);
+//        this.restMins = parameters.get(4);
     }
 
     private ArrayList<Integer> getParameters() {
@@ -175,24 +156,76 @@ public class MainActivity extends Activity {
 
         return parameters;
     }
+//
+//    private ArrayList<Integer> readParameters() {
+//
+//        ArrayList<Integer> parameters = new ArrayList<>();
+//
+//        if (this.isExternalStorageReadable()) {
+//
+//        } else {
+//            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable.", Toast.LENGTH_LONG).show();
+//        }
+//
+//        return parameters;
+//    }
 
     private void writeParameters() {
         ArrayList<Integer> parameters = this.getParameters();
 
-        try {
-            StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder();
 
-            for (int a : parameters) {
-                result.append(a).append(" ");
-            }
-
-            //TODO Write the parameters to the 'parameters' file
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        for (int a : parameters) {
+            result.append(a).append(" ");
         }
+
+        if (this.isExternalStorageWritable()) {
+            try {
+                File root = new File(Environment.getExternalStorageDirectory(), "Notes");
+
+                if (!root.exists()) {
+                    root.mkdirs();
+                }
+
+                File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
+                FileWriter writer = new FileWriter(gpxfile);
+
+                writer.append(result.toString());
+                writer.close();
+
+                Toast.makeText(this.getApplicationContext(), "Saved", Toast.LENGTH_LONG).show();
+            } catch (IOException e) {
+                Toast.makeText(this.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable.", Toast.LENGTH_LONG).show();
+        }
+
     }
     //========================================================
+
+    // Checks if external storage is available for read and write
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    // Checks if external storage is available to at least read
+    public boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+
+        if (Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            return true;
+        }
+
+        return false;
+    }
 
     // Custom methods to get the parameters on the screen
     @SuppressLint("SetTextI18n")

@@ -7,7 +7,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 
 
-public class RepeatListener implements OnTouchListener{
+public class RepeatListener implements OnTouchListener {
 
     private Handler handler = new Handler();
     private View downView;
@@ -24,11 +24,11 @@ public class RepeatListener implements OnTouchListener{
     };
 
     public RepeatListener(int initialInterval, int normalInterval, View.OnClickListener clickListener) {
-        if (clickListener == null){
+        if (clickListener == null) {
             throw new IllegalArgumentException("null runnable");
         }
 
-        if (initialInterval < 0 || normalInterval < 0){
+        if (initialInterval < 0 || normalInterval < 0) {
             throw new IllegalArgumentException("negative interval");
         }
 
@@ -42,7 +42,7 @@ public class RepeatListener implements OnTouchListener{
 
         switch (motionEvent.getAction()) {
 
-            case MotionEvent.ACTION_DOWN:{
+            case MotionEvent.ACTION_DOWN: {
                 handler.removeCallbacks(handlerRunnable);
                 handler.postDelayed(handlerRunnable, initialInterval);
                 downView = view;
@@ -52,7 +52,7 @@ public class RepeatListener implements OnTouchListener{
             }
 
             case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:{
+            case MotionEvent.ACTION_CANCEL: {
                 handler.removeCallbacks(handlerRunnable);
                 downView.setPressed(false);
                 downView = null;

@@ -102,11 +102,11 @@ public class TimerActivity extends Activity {
         Bundle mainActivityBundle = getIntent().getExtras();
 
 //        if(savedInstanceState == null){
-            this.sets = mainActivityBundle.getInt("sets");
-            this.workSecs = mainActivityBundle.getInt("workSecs");
-            this.workMins = mainActivityBundle.getInt("workMins");
-            this.restSecs = mainActivityBundle.getInt("restSecs");
-            this.restMins = mainActivityBundle.getInt("restMins");
+        this.sets = mainActivityBundle.getInt("sets");
+        this.workSecs = mainActivityBundle.getInt("workSecs");
+        this.workMins = mainActivityBundle.getInt("workMins");
+        this.restSecs = mainActivityBundle.getInt("restSecs");
+        this.restMins = mainActivityBundle.getInt("restMins");
         /*}
         else{
 
@@ -224,7 +224,7 @@ public class TimerActivity extends Activity {
 
     private void startRestTimer() {
 
-        if(this.startingRestSecs > 0){
+        if (this.startingRestSecs > 0) {
             this.thisActivity.setBackgroundColor(Color.GREEN);
 
             this.mpToRest.start();
@@ -238,8 +238,7 @@ public class TimerActivity extends Activity {
             this.trainingMotivationalText.setText("Rest now");
 
             this.restCountDownTimer.start();
-        }
-        else {
+        } else {
 
         }
 
@@ -365,8 +364,7 @@ public class TimerActivity extends Activity {
             this.workCountDownTimer.start();
 
             this.thisActivity.setBackgroundColor(Color.RED);
-        }
-        else {
+        } else {
             this.restCountDownTimer = new CountDownTimer((((this.pausedRestMins * 60) + this.pausedRestSecs) * 1000) + 1, 1000) {
 
                 @Override
@@ -444,7 +442,7 @@ public class TimerActivity extends Activity {
                 .setContentIntent(pendingIntent);  // Open this activity when the notification is pressed
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify("oneAndOnly", 1,  mBuilder.build());
+        notificationManager.notify("oneAndOnly", 1, mBuilder.build());
 
 
     }
