@@ -1,11 +1,14 @@
 package com.dev.iccaka.intervaltimer;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -145,6 +148,7 @@ public class MainActivity extends Activity {
 //        this.restMins = parameters.get(4);
     }
 
+    // Returns a list containing the current parameters
     private ArrayList<Integer> getParameters() {
         ArrayList<Integer> parameters = new ArrayList<>();
 
@@ -156,7 +160,7 @@ public class MainActivity extends Activity {
 
         return parameters;
     }
-//
+
 //    private ArrayList<Integer> readParameters() {
 //
 //        ArrayList<Integer> parameters = new ArrayList<>();
@@ -190,6 +194,9 @@ public class MainActivity extends Activity {
                 File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
                 FileWriter writer = new FileWriter(gpxfile);
 
+//                FileOutputStream writer = new FileOutputStream(gpxfile);
+//                writer.write(result.toString().getBytes());
+
                 writer.append(result.toString());
                 writer.close();
 
@@ -204,8 +211,25 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
+    public void requestStoragePermission(View view) {
+        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    this.timerStart();
+                } else {
+                    Toast.makeText(MainActivity.this, "Permission denied to read your External storage", Toast.LENGTH_SHORT).show();
+                    this.finish();
+                }
+        }
+    }
+
     // Checks if external storage is available for read and write
-    public boolean isExternalStorageWritable() {
+    private boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
 
         if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -215,9 +239,8 @@ public class MainActivity extends Activity {
         return false;
     }
 
-
     // Checks if external storage is available to at least read
-    public boolean isExternalStorageReadable() {
+    private boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
 
         if (Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
@@ -358,7 +381,7 @@ public class MainActivity extends Activity {
     //========================================================
 
     // Method to start the timer and pass the parameters to the TimerActivity class
-    public void timerStart(View view) {
+    public void timerStart() {
 
         this.writeParameters();
 
@@ -371,5 +394,7 @@ public class MainActivity extends Activity {
         intent.putExtra("restMins", this.restMins);
 
         startActivity(intent);
+
+//        Toast.makeText(this.getApplicationContext(), "Your data(sets, work interval and rest interval) won't be saved!", Toast.LENGTH_LONG).show();
     }
 }
