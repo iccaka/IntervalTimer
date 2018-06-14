@@ -139,16 +139,17 @@ public class MainActivity extends Activity {
 
     // Methods to read/write the parameters to the corresponding file
     private void setParameters() {
-//        ArrayList<Integer> parameters = this.readParameters();
-//
-//        this.sets = parameters.get(0);
-//        this.workSecs = parameters.get(1);
-//        this.workMins = parameters.get(2);
-//        this.restSecs = parameters.get(3);
-//        this.restMins = parameters.get(4);
+        // get the parameters from the external storage
+        ArrayList<Integer> parameters = this.readParameters();
+
+        // set the new values
+        this.sets = parameters.get(0);
+        this.workSecs = parameters.get(1);
+        this.workMins = parameters.get(2);
+        this.restSecs = parameters.get(3);
+        this.restMins = parameters.get(4);
     }
 
-    // Returns a list containing the current parameters
     private ArrayList<Integer> getParameters() {
         ArrayList<Integer> parameters = new ArrayList<>();
 
@@ -159,76 +160,64 @@ public class MainActivity extends Activity {
         parameters.add(this.restMins);
 
         return parameters;
+    }  // Returns a list containing the current parameters
+
+    private ArrayList<Integer> readParameters() {
+
+        ArrayList<Integer> parameters = new ArrayList<>();
+
+        if (this.isExternalStorageReadable()) {
+
+        } else {
+            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable.", Toast.LENGTH_LONG).show();
+        }
+
+        return parameters;
     }
 
-//    private ArrayList<Integer> readParameters() {
-//
-//        ArrayList<Integer> parameters = new ArrayList<>();
-//
-//        if (this.isExternalStorageReadable()) {
-//
-//        } else {
-//            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable.", Toast.LENGTH_LONG).show();
-//        }
-//
-//        return parameters;
-//    }
-
-    private void writeParameters() {
+    private void writeParameters() {  // Writes the current parameters from the 'getparameters' method to the parameters file
         ArrayList<Integer> parameters = this.getParameters();
 
         StringBuilder result = new StringBuilder();
 
+        // create a string using the template('sets' 'workSecs' 'workMin' 'restSecs' 'restMins'(
         for (int a : parameters) {
             result.append(a).append(" ");
         }
 
+        // check if the external storage is accessible, using the custom 'isExternalStorageWritable' method, so we can write to the parameters file
         if (this.isExternalStorageWritable()) {
             try {
+                // create a new directory inside the external storage
                 File root = new File(Environment.getExternalStorageDirectory(), "Notes");
 
+                // if it doesn't exist...
                 if (!root.exists()) {
+                    // create it and all the corresponding files inside needed to function properly
                     root.mkdirs();
                 }
 
+                // now create the real 'parameters' file, where we will write the values of the parameters
                 File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
+                // create a 'FileWriter' by passing 'gpxfile' to it's constructor
                 FileWriter writer = new FileWriter(gpxfile);
 
-//                FileOutputStream writer = new FileOutputStream(gpxfile);
-//                writer.write(result.toString().getBytes());
-
+                // append the string('StringBuilder result = new StringBuilder()')
                 writer.append(result.toString());
+                // close the data stream
                 writer.close();
 
-                Toast.makeText(this.getApplicationContext(), "Saved", Toast.LENGTH_LONG).show();
             } catch (IOException e) {
                 Toast.makeText(this.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
             }
-        } else {
-            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable.", Toast.LENGTH_LONG).show();
+        } else {  // if it's not accessible, show a 'Toast'
+            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable, the app won't be able to save your values.", Toast.LENGTH_LONG).show();
         }
 
     }
     //========================================================
 
-    public void requestStoragePermission(View view) {
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case 1:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    this.timerStart();
-                } else {
-                    Toast.makeText(MainActivity.this, "Permission denied to read your External storage", Toast.LENGTH_SHORT).show();
-                    this.finish();
-                }
-        }
-    }
-
-    // Checks if external storage is available for read and write
+    // Checks if the external storage is available for read and write
     private boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
 
@@ -239,7 +228,7 @@ public class MainActivity extends Activity {
         return false;
     }
 
-    // Checks if external storage is available to at least read
+    // Checks if the external storage is available to at least read
     private boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
 
@@ -380,21 +369,42 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
+    // Method just to request permission for writing inside the external storage
+    public void requestWriteStoragePermission(View view) {
+        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+    }
+
+    // Method that gets invoked when we set a certain permission
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1:
+                // if the permission was granted
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    this.writeParameters();
+                    this.timerStart();
+                } else { // if the permission wasn't granted
+                    Toast.makeText(MainActivity.this, "The app won't be able to save your values", Toast.LENGTH_SHORT).show();
+                    this.timerStart();
+                }
+        }
+    }
+
     // Method to start the timer and pass the parameters to the TimerActivity class
     public void timerStart() {
 
-        this.writeParameters();
-
+        // create an Intent so we can start new activity
         Intent intent = new Intent(this, TimerActivity.class);
 
+        // put the parameters' values inside the intent
         intent.putExtra("sets", this.sets);
         intent.putExtra("workSecs", this.workSecs);
         intent.putExtra("workMins", this.workMins);
         intent.putExtra("restSecs", this.restSecs);
         intent.putExtra("restMins", this.restMins);
 
+        // finally start the activity
         startActivity(intent);
 
-//        Toast.makeText(this.getApplicationContext(), "Your data(sets, work interval and rest interval) won't be saved!", Toast.LENGTH_LONG).show();
     }
 }
