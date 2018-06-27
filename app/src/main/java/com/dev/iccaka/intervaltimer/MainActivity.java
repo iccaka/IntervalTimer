@@ -12,10 +12,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +41,7 @@ public class MainActivity extends Activity {
     private Button restMinusBtn;
     private Button restPlusBtn;
     //========================================================
-    
+
     private static final int DEFAULT_SETS = 12;
     private static final int DEFAULT_WORK_SECS = 30;
     private static final int DEFAULT_WORK_MINS = 1;
@@ -55,9 +54,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //initialize the default values of the parameters
-        this.initializeDefaultParameters();
 
         //get the views from the R class
         this.setsMinusBtn = findViewById(R.id.setsMinusBtn);
@@ -118,7 +114,7 @@ public class MainActivity extends Activity {
         super.onStart();
 
         //set the parameters by reading their values from the 'parameters' file
-        this.setParameters();
+        this.requestReadStoragePermission();
 
         //get the information on the screen via the custom methods
         this.updateSets();
@@ -127,8 +123,8 @@ public class MainActivity extends Activity {
         //========================================================
     }
 
-    // Methods to read/write the parameters to the corresponding file
-    private void setParameters() {
+    // Methods to read or write the parameters to the corresponding file
+    private void setParameters() throws FileNotFoundException {
 
         // get the parameters from the external storage
         if (this.isExternalStorageReadable()) {
@@ -159,16 +155,39 @@ public class MainActivity extends Activity {
         return parameters;
     }  // Returns a list containing the current values of the parameters
 
-    private ArrayList<Integer> readParameters() {
+    // Reads the parameters from the 'parameters' file inside the external storage
+    private ArrayList<Integer> readParameters() throws FileNotFoundException {
 
         ArrayList<Integer> parameters = new ArrayList<>();
 
-        //TODO Read the parameters from the 'parameters' file inside the external storage
+        // create a new directory inside the external storage
+        File root = new File(Environment.getExternalStorageDirectory(), "Notes");
+
+        // if it doesn't exist...
+        if (!root.exists()) {
+            // ...create it and all the corresponding files inside needed to function properly
+            root.mkdirs();
+        }
+
+        // get'parameters' file, from where we will read the values of the parameters
+        File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
+
+        if(gpxfile.length() == 0){
+            this.initializeDefaultParameters();
+            parameters = this.getParameters();
+
+            return parameters;
+        }
+
+        FileReader reader = new FileReader(gpxfile);
+
+        while(reader)
 
         return parameters;
     }
 
-    private void writeParameters() {  // Writes the current parameters from the 'getparameters' method to the parameters file
+    // Writes the current parameters from the 'getparameters' method to the parameters file
+    private void writeParameters() {
         ArrayList<Integer> parameters = this.getParameters();
 
         StringBuilder result = new StringBuilder();
@@ -218,6 +237,7 @@ public class MainActivity extends Activity {
         this.restMins = DEFAULT_REST_MINS;
     }
 
+    // Methods to check if the external storage is either writable and readable or read-only
     // Checks if the external storage is available for read and write
     private boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
@@ -405,9 +425,15 @@ public class MainActivity extends Activity {
             case 2:
                 // if the 'read only' permission was granted
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                    try {
+                        this.setParameters();
+                    } catch (FileNotFoundException e) {
+                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 } else { // if the permission wasn't granted a.k.a we can't read
-
+                    Toast.makeText(MainActivity.this, "The app won't be able to read your previous values", Toast.LENGTH_SHORT).show();
+                    this.initializeDefaultParameters();
+                    Toast.makeText(this.getApplicationContext(), "Initialized the default values.", Toast.LENGTH_LONG).show();
                 }
         }
     }
