@@ -33,10 +33,10 @@ public class MainActivity extends Activity {
 
     // Current parameters
     private int sets;
-    private int workMins;
     private int workSecs;
-    private int restMins;
+    private int workMins;
     private int restSecs;
+    private int restMins;
     //========================================================
 
     // Views from activity_main.xml
@@ -53,6 +53,11 @@ public class MainActivity extends Activity {
 
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
+    private static final int DEFAULT_SETS = 12;
+    private static final int DEFAULT_WORK_SECS = 30;
+    private static final int DEFAULT_WORK_MINS = 1;
+    private static final int DEFAULT_REST_SECS = 30;
+    private static final int DEFAULT_REST_MINS = 0;
     private static final String DEFAULT_FILE_NAME = "parameters";
 
     @SuppressLint("ClickableViewAccessibility")
@@ -61,13 +66,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //initialize the default values
-        this.sets = 12;
-        this.workSecs = 30;
-        this.workMins = 1;
-        this.restSecs = 30;
-        this.restMins = 0;
-        //========================================================
+        //initialize the default values of the parameters
+        this.initializeDefaultParameters();
 
         //get the views from the R class
         this.setsMinusBtn = findViewById(R.id.setsMinusBtn);
@@ -139,15 +139,23 @@ public class MainActivity extends Activity {
 
     // Methods to read/write the parameters to the corresponding file
     private void setParameters() {
-        // get the parameters from the external storage
-        ArrayList<Integer> parameters = this.readParameters();
 
-        // set the new values
-        this.sets = parameters.get(0);
-        this.workSecs = parameters.get(1);
-        this.workMins = parameters.get(2);
-        this.restSecs = parameters.get(3);
-        this.restMins = parameters.get(4);
+        // get the parameters from the external storage
+        if(this.isExternalStorageReadable()){
+            ArrayList<Integer> parameters = this.readParameters();
+
+            // set the new values
+            this.sets = parameters.get(0);
+            this.workSecs = parameters.get(1);
+            this.workMins = parameters.get(2);
+            this.restSecs = parameters.get(3);
+            this.restMins = parameters.get(4);
+        }
+        else {
+            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable.", Toast.LENGTH_LONG).show();
+            this.initializeDefaultParameters();
+            Toast.makeText(this.getApplicationContext(), "Initialized the default values.", Toast.LENGTH_LONG).show();
+        }
     }
 
     private ArrayList<Integer> getParameters() {
@@ -160,17 +168,13 @@ public class MainActivity extends Activity {
         parameters.add(this.restMins);
 
         return parameters;
-    }  // Returns a list containing the current parameters
+    }  // Returns a list containing the current values of the parameters
 
     private ArrayList<Integer> readParameters() {
 
         ArrayList<Integer> parameters = new ArrayList<>();
 
-        if (this.isExternalStorageReadable()) {
-
-        } else {
-            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable.", Toast.LENGTH_LONG).show();
-        }
+        //TODO Read the parameters from the 'parameters' file inside the external storage
 
         return parameters;
     }
@@ -193,7 +197,7 @@ public class MainActivity extends Activity {
 
                 // if it doesn't exist...
                 if (!root.exists()) {
-                    // create it and all the corresponding files inside needed to function properly
+                    // ...create it and all the corresponding files inside needed to function properly
                     root.mkdirs();
                 }
 
@@ -216,6 +220,14 @@ public class MainActivity extends Activity {
 
     }
     //========================================================
+
+    private void initializeDefaultParameters(){
+        this.sets = DEFAULT_SETS;
+        this.workSecs = DEFAULT_WORK_SECS;
+        this.workMins = DEFAULT_WORK_MINS;
+        this.restSecs = DEFAULT_REST_SECS;
+        this.restMins = DEFAULT_REST_MINS;
+    }
 
     // Checks if the external storage is available for read and write
     private boolean isExternalStorageWritable() {
@@ -369,29 +381,51 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    // Method just to request permission for writing inside the external storage
+    // Method just to request permission for reading inside the external storage
+    // After we receive a result from this method, we go to 'onRequestPermissionResult'
+    private void requestReadStoragePermission(){
+        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
+    }
+
+    // Method just to request permission for writing inside the external storage (it also receives reading permission)
+    // After we receive a result from this method, we go to 'onRequestPermissionResult'
     public void requestWriteStoragePermission(View view) {
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
     }
 
-    // Method that gets invoked when we set a certain permission
+    /* Method that gets invoked and handles permission results differently
+       ('requestCode' 1 is when we enable both write and read a.k.a when we start the
+       timer, 2 is only at the begging of the application, where we only
+       want to read the values of the parameters from the 'parameters file',
+       at 'requestReadStoragePermission' method)
+    */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case 1:
-                // if the permission was granted
+                // if the write permission was granted
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     this.writeParameters();
                     this.timerStart();
-                } else { // if the permission wasn't granted
+                } else { // if the permission wasn't granted a.k.a we can't write
                     Toast.makeText(MainActivity.this, "The app won't be able to save your values", Toast.LENGTH_SHORT).show();
                     this.timerStart();
+                }
+                break;
+
+            case 2:
+                // if the 'read only' permission was granted
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+
+                }
+                else { // if the permission wasn't granted a.k.a we can't read
+                
                 }
         }
     }
 
     // Method to start the timer and pass the parameters to the TimerActivity class
-    public void timerStart() {
+    private void timerStart() {
 
         // create an Intent so we can start new activity
         Intent intent = new Intent(this, TimerActivity.class);
