@@ -18,6 +18,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 
 public class MainActivity extends Activity {
@@ -41,6 +45,8 @@ public class MainActivity extends Activity {
     private Button restMinusBtn;
     private Button restPlusBtn;
     //========================================================
+
+    private boolean isExternalStorageAccessable;
 
     private static final int DEFAULT_SETS = 12;
     private static final int DEFAULT_WORK_SECS = 30;
@@ -114,7 +120,11 @@ public class MainActivity extends Activity {
         super.onStart();
 
         //set the parameters by reading their values from the 'parameters' file
-        this.requestReadStoragePermission();
+        try {
+            this.setParameters();
+        } catch (IOException e) {
+            Toast.makeText(this.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+        }
 
         //get the information on the screen via the custom methods
         this.updateSets();
@@ -124,11 +134,11 @@ public class MainActivity extends Activity {
     }
 
     // Methods to read or write the parameters to the corresponding file
-    private void setParameters() throws FileNotFoundException {
+    private void setParameters() throws IOException {
 
         // get the parameters from the external storage
         if (this.isExternalStorageReadable()) {
-            ArrayList<Integer> parameters = this.readParameters();
+            List<Integer> parameters = this.readParameters();
 
             // set the new values
             this.sets = parameters.get(0);
@@ -143,7 +153,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private ArrayList<Integer> getParameters() {
+    private List<Integer> getParameters() {
         ArrayList<Integer> parameters = new ArrayList<>();
 
         parameters.add(this.sets);
@@ -152,43 +162,39 @@ public class MainActivity extends Activity {
         parameters.add(this.restSecs);
         parameters.add(this.restMins);
 
-        return parameters;
+        return Collections.unmodifiableList(parameters);
     }  // Returns a list containing the current values of the parameters
 
     // Reads the parameters from the 'parameters' file inside the external storage
-    private ArrayList<Integer> readParameters() throws FileNotFoundException {
+    private List<Integer> readParameters() throws IOException {
 
-        ArrayList<Integer> parameters = new ArrayList<>();
+        List<Integer> parameters = new ArrayList<>();
 
         // create a new directory inside the external storage
         File root = new File(Environment.getExternalStorageDirectory(), "Notes");
 
         // if it doesn't exist...
         if (!root.exists()) {
-            // ...create it and all the corresponding files inside needed to function properly
-            root.mkdirs();
-        }
-
-        // get'parameters' file, from where we will read the values of the parameters
-        File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
-
-        if(gpxfile.length() == 0){
             this.initializeDefaultParameters();
             parameters = this.getParameters();
 
-            return parameters;
+            return Collections.unmodifiableList(parameters);
         }
 
+        // get the 'parameters' file, from where we will read the values of the parameters
+        File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
         FileReader reader = new FileReader(gpxfile);
 
-        while(reader)
+        while(gpxfile.canRead()){
+            parameters.add(reader.read());
+        }
 
-        return parameters;
+        return Collections.unmodifiableList(parameters);
     }
 
     // Writes the current parameters from the 'getparameters' method to the parameters file
     private void writeParameters() {
-        ArrayList<Integer> parameters = this.getParameters();
+        List<Integer> parameters = this.getParameters();
 
         StringBuilder result = new StringBuilder();
 
@@ -237,7 +243,6 @@ public class MainActivity extends Activity {
         this.restMins = DEFAULT_REST_MINS;
     }
 
-    // Methods to check if the external storage is either writable and readable or read-only
     // Checks if the external storage is available for read and write
     private boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
@@ -422,19 +427,19 @@ public class MainActivity extends Activity {
                 }
                 break;
 
-            case 2:
-                // if the 'read only' permission was granted
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    try {
-                        this.setParameters();
-                    } catch (FileNotFoundException e) {
-                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                } else { // if the permission wasn't granted a.k.a we can't read
-                    Toast.makeText(MainActivity.this, "The app won't be able to read your previous values", Toast.LENGTH_SHORT).show();
-                    this.initializeDefaultParameters();
-                    Toast.makeText(this.getApplicationContext(), "Initialized the default values.", Toast.LENGTH_LONG).show();
-                }
+//            case 2:
+//                // if the 'read only' permission was granted
+//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    try {
+//                        this.setParameters();
+//                    } catch (FileNotFoundException e) {
+//                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+//                    }
+//                } else { // if the permission wasn't granted a.k.a we can't read
+//                    Toast.makeText(MainActivity.this, "The app won't be able to read your previous values", Toast.LENGTH_SHORT).show();
+//                    this.initializeDefaultParameters();
+//                    Toast.makeText(this.getApplicationContext(), "Initialized the default values.", Toast.LENGTH_LONG).show();
+//                }
         }
     }
 
