@@ -3,7 +3,6 @@ package com.dev.iccaka.intervaltimer;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -17,15 +16,8 @@ import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 
@@ -50,9 +42,7 @@ public class MainActivity extends Activity {
     private Button restMinusBtn;
     private Button restPlusBtn;
     //========================================================
-
-    private BufferedReader bufferedReader;
-    private BufferedWriter bufferedWriter;
+    
     private static final int DEFAULT_SETS = 12;
     private static final int DEFAULT_WORK_SECS = 30;
     private static final int DEFAULT_WORK_MINS = 1;
@@ -141,7 +131,7 @@ public class MainActivity extends Activity {
     private void setParameters() {
 
         // get the parameters from the external storage
-        if(this.isExternalStorageReadable()){
+        if (this.isExternalStorageReadable()) {
             ArrayList<Integer> parameters = this.readParameters();
 
             // set the new values
@@ -150,8 +140,7 @@ public class MainActivity extends Activity {
             this.workMins = parameters.get(2);
             this.restSecs = parameters.get(3);
             this.restMins = parameters.get(4);
-        }
-        else {
+        } else {
             Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable.", Toast.LENGTH_LONG).show();
             this.initializeDefaultParameters();
             Toast.makeText(this.getApplicationContext(), "Initialized the default values.", Toast.LENGTH_LONG).show();
@@ -221,7 +210,7 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    private void initializeDefaultParameters(){
+    private void initializeDefaultParameters() {
         this.sets = DEFAULT_SETS;
         this.workSecs = DEFAULT_WORK_SECS;
         this.workMins = DEFAULT_WORK_MINS;
@@ -383,7 +372,7 @@ public class MainActivity extends Activity {
 
     // Method just to request permission for reading inside the external storage
     // After we receive a result from this method, we go to 'onRequestPermissionResult'
-    private void requestReadStoragePermission(){
+    private void requestReadStoragePermission() {
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
     }
 
@@ -415,11 +404,10 @@ public class MainActivity extends Activity {
 
             case 2:
                 // if the 'read only' permission was granted
-                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                }
-                else { // if the permission wasn't granted a.k.a we can't read
-                
+                } else { // if the permission wasn't granted a.k.a we can't read
+
                 }
         }
     }
