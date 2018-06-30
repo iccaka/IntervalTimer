@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.PermissionInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -17,16 +16,11 @@ import android.widget.Toast;
 import com.dev.iccaka.intervaltimer.Exceptions.DirectoryNotFoundException;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Serializable;
-import java.security.Permission;
-import java.security.PermissionCollection;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -59,16 +53,13 @@ public class MainActivity extends Activity {
     private static final int DEFAULT_REST_SECS = 30;
     private static final int DEFAULT_REST_MINS = 0;
     private static final String DEFAULT_FILE_NAME = "parameters";
+    private static final int START_TIMER = 1;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        if(!this.isExternalStorageAccessPermissionGranted()){
-            this.requestWriteStoragePermission();
-        }
 
         //get the views from the R class
         this.setsMinusBtn = findViewById(R.id.setsMinusBtn);
@@ -121,6 +112,15 @@ public class MainActivity extends Activity {
         }));
         //========================================================
 
+
+        if (!this.isExternalStorageAccessPermissionGranted()) {
+            this.requestWriteStoragePermission();
+        }
+
+        if (this.isExternalStorageAccessPermissionGranted()) {
+            //set the parameters by reading their values from the 'parameters' file
+            this.setParameters();
+        }
     }
 
     @Override
@@ -128,16 +128,8 @@ public class MainActivity extends Activity {
 
         super.onStart();
 
-        if(this.isExternalStorageAccessPermissionGranted()){
-            //set the parameters by reading their values from the 'parameters' file
-            this.setParameters();
-        }
-
         //get the information on the screen via the custom methods
-        this.updateSets();
-        this.updateWork();
-        this.updateRest();
-        //========================================================
+        this.updateData();
     }
 
     // Methods to read or write the parameters to the corresponding file
@@ -146,7 +138,7 @@ public class MainActivity extends Activity {
         // get the parameters from the external storage
         if (this.isExternalStorageReadable()) {
 
-            try{
+            try {
                 List<Integer> parameters = this.readParameters();
 
                 // set the new values
@@ -155,8 +147,7 @@ public class MainActivity extends Activity {
                 this.workMins = parameters.get(2);
                 this.restSecs = parameters.get(3);
                 this.restMins = parameters.get(4);
-            }
-            catch (IOException e){
+            } catch (IOException e) {
                 this.initializeDefaultParameters();
             }
 
@@ -194,15 +185,23 @@ public class MainActivity extends Activity {
 
         // get the 'parameters' file, from where we will read the values of the parameters
         File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
-        FileReader reader = new FileReader(gpxfile);
+//        FileReader reader = new FileReader(gpxfile);
+        FileInputStream fis = new FileInputStream(gpxfile);
 
         StringBuilder builder = new StringBuilder();
 
-        while (gpxfile.canRead()) {
-            builder.append(reader.read());
+        while(true){
+            int currChar = fis.read();
+
+            if(currChar == -1){
+                break;
+            }
+
+            builder.append((char) currChar);
         }
 
         String[] values = builder.toString().split(" ");
+
         for (String value : values) {
             parameters.add(Integer.parseInt(value));
         }
@@ -294,6 +293,12 @@ public class MainActivity extends Activity {
     }
 
     // Custom methods to get the parameters on the screen
+    private void updateData(){
+        this.updateSets();
+        this.updateWork();
+        this.updateRest();
+    }
+
     @SuppressLint("SetTextI18n")
     private void updateSets() {
         if (this.sets > 9) {
@@ -485,7 +490,19 @@ public class MainActivity extends Activity {
         intent.putExtra("restMins", this.restMins);
 
         // finally start the activity
-        startActivity(intent);
+        startActivityForResult(intent, MainActivity.START_TIMER);
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == MainActivity.START_TIMER && resultCode == RESULT_OK){
+            if (this.isExternalStorageAccessPermissionGranted()) {
+                //set the parameters by reading their values from the 'parameters' file
+                this.setParameters();
+                this.updateData();
+            }
+        }
+    }
+
 }
