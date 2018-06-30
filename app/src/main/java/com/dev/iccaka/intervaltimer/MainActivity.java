@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PermissionInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -12,11 +13,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.dev.iccaka.intervaltimer.Exceptions.DirectoryNotFoundException;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
+import java.security.Permission;
+import java.security.PermissionCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,8 +53,6 @@ public class MainActivity extends Activity {
     private Button restPlusBtn;
     //========================================================
 
-    private boolean isExternalStorageAccessable;
-
     private static final int DEFAULT_SETS = 12;
     private static final int DEFAULT_WORK_SECS = 30;
     private static final int DEFAULT_WORK_MINS = 1;
@@ -60,6 +65,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if(!this.isExternalStorageAccessPermissionGranted()){
+            this.requestWriteStoragePermission();
+        }
 
         //get the views from the R class
         this.setsMinusBtn = findViewById(R.id.setsMinusBtn);
@@ -119,11 +128,9 @@ public class MainActivity extends Activity {
 
         super.onStart();
 
-        //set the parameters by reading their values from the 'parameters' file
-        try {
+        if(this.isExternalStorageAccessPermissionGranted()){
+            //set the parameters by reading their values from the 'parameters' file
             this.setParameters();
-        } catch (IOException e) {
-            Toast.makeText(this.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
         //get the information on the screen via the custom methods
@@ -134,18 +141,25 @@ public class MainActivity extends Activity {
     }
 
     // Methods to read or write the parameters to the corresponding file
-    private void setParameters() throws IOException {
+    private void setParameters() {
 
         // get the parameters from the external storage
         if (this.isExternalStorageReadable()) {
-            List<Integer> parameters = this.readParameters();
 
-            // set the new values
-            this.sets = parameters.get(0);
-            this.workSecs = parameters.get(1);
-            this.workMins = parameters.get(2);
-            this.restSecs = parameters.get(3);
-            this.restMins = parameters.get(4);
+            try{
+                List<Integer> parameters = this.readParameters();
+
+                // set the new values
+                this.sets = parameters.get(0);
+                this.workSecs = parameters.get(1);
+                this.workMins = parameters.get(2);
+                this.restSecs = parameters.get(3);
+                this.restMins = parameters.get(4);
+            }
+            catch (IOException e){
+                this.initializeDefaultParameters();
+            }
+
         } else {
             Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable.", Toast.LENGTH_LONG).show();
             this.initializeDefaultParameters();
@@ -175,18 +189,22 @@ public class MainActivity extends Activity {
 
         // if it doesn't exist...
         if (!root.exists()) {
-            this.initializeDefaultParameters();
-            parameters = this.getParameters();
-
-            return Collections.unmodifiableList(parameters);
+            throw new DirectoryNotFoundException("The 'Notes' directory wasn't found");
         }
 
         // get the 'parameters' file, from where we will read the values of the parameters
         File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
         FileReader reader = new FileReader(gpxfile);
 
-        while(gpxfile.canRead()){
-            parameters.add(reader.read());
+        StringBuilder builder = new StringBuilder();
+
+        while (gpxfile.canRead()) {
+            builder.append(reader.read());
+        }
+
+        String[] values = builder.toString().split(" ");
+        for (String value : values) {
+            parameters.add(Integer.parseInt(value));
         }
 
         return Collections.unmodifiableList(parameters);
@@ -194,16 +212,18 @@ public class MainActivity extends Activity {
 
     // Writes the current parameters from the 'getparameters' method to the parameters file
     private void writeParameters() {
+        // get the current values of the parameters and put them into an 'Integer' list
         List<Integer> parameters = this.getParameters();
 
         StringBuilder result = new StringBuilder();
 
-        // create a string using the template('sets' 'workSecs' 'workMin' 'restSecs' 'restMins'(
+        // create a string using the template('sets' 'workSecs' 'workMin' 'restSecs' 'restMins')
         for (int a : parameters) {
             result.append(a).append(" ");
         }
 
-        // check if the external storage is accessible, using the custom 'isExternalStorageWritable' method, so we can write to the parameters file
+        // check if the external storage is accessible, using the custom
+        // 'isExternalStorageWritable' method, so we can write to the parameters file
         if (this.isExternalStorageWritable()) {
             try {
                 // create a new directory inside the external storage
@@ -215,7 +235,7 @@ public class MainActivity extends Activity {
                     root.mkdirs();
                 }
 
-                // now create the real 'parameters' file, where we will write the values of the parameters
+                // now create the real 'parameters' file, using the default name, where we will write the values of the parameters
                 File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
                 // create a 'FileWriter' by passing 'gpxfile' to it's constructor
                 FileWriter writer = new FileWriter(gpxfile);
@@ -229,12 +249,13 @@ public class MainActivity extends Activity {
                 Toast.makeText(this.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
             }
         } else {  // if it's not accessible, show a 'Toast'
-            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable, the app won't be able to save your values.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable, the app won't be able to save your custom values.", Toast.LENGTH_LONG).show();
         }
 
     }
     //========================================================
 
+    // Gets the current parameters values back to their default ones
     private void initializeDefaultParameters() {
         this.sets = DEFAULT_SETS;
         this.workSecs = DEFAULT_WORK_SECS;
@@ -263,6 +284,13 @@ public class MainActivity extends Activity {
         }
 
         return false;
+    }
+
+    private boolean isExternalStorageAccessPermissionGranted() {
+        String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        int result = getApplicationContext().checkCallingOrSelfPermission(permission);
+
+        return (result == PackageManager.PERMISSION_GRANTED);
     }
 
     // Custom methods to get the parameters on the screen
@@ -395,15 +423,15 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    // Method just to request permission for reading inside the external storage
-    // After we receive a result from this method, we go to 'onRequestPermissionResult'
-    private void requestReadStoragePermission() {
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
-    }
+//    // Method just to request permission for reading inside the external storage
+//    // After we receive a result from this method, we go to 'onRequestPermissionResult'
+//    private void requestReadStoragePermission() {
+//        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
+//    }
 
     // Method just to request permission for writing inside the external storage (it also receives reading permission)
     // After we receive a result from this method, we go to 'onRequestPermissionResult'
-    public void requestWriteStoragePermission(View view) {
+    public void requestWriteStoragePermission() {
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
     }
 
@@ -419,11 +447,9 @@ public class MainActivity extends Activity {
             case 1:
                 // if the write permission was granted
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    this.writeParameters();
-                    this.timerStart();
+
                 } else { // if the permission wasn't granted a.k.a we can't write
                     Toast.makeText(MainActivity.this, "The app won't be able to save your values", Toast.LENGTH_SHORT).show();
-                    this.timerStart();
                 }
                 break;
 
@@ -444,7 +470,9 @@ public class MainActivity extends Activity {
     }
 
     // Method to start the timer and pass the parameters to the TimerActivity class
-    private void timerStart() {
+    public void timerStart(View view) {
+
+        this.writeParameters();
 
         // create an Intent so we can start new activity
         Intent intent = new Intent(this, TimerActivity.class);

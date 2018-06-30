@@ -125,12 +125,9 @@ public class TimerActivity extends Activity {
         this.mpToEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.end);
         this.mpToFullyEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.fullyend);
 
-        this.endBtn.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                endTimer(endBtn);
-                return false;
-            }
+        this.endBtn.setOnLongClickListener(v -> {
+            endTimer(new View(this.getApplicationContext()));
+            return false;
         });
 
         this.createNotificationChannel();
@@ -428,21 +425,21 @@ public class TimerActivity extends Activity {
         this.restCountDownTimer.cancel();
 
         this.finish();
+//
+//        Intent intent = new Intent(this, TimerActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-        Intent intent = new Intent(this, TimerActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+//        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
+//                .setSmallIcon(R.drawable.ic_stat_paused_app)
+//                .setContentTitle("Sample title")
+//                .setContentText("Sample text")
+//                .setAutoCancel(true)
+//                .setPriority(NotificationManager.IMPORTANCE_HIGH)
+//                .setContentIntent(pendingIntent);  // Open this activity when the notification is pressed
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
-                .setSmallIcon(R.drawable.ic_stat_paused_app)
-                .setContentTitle("Sample title")
-                .setContentText("Sample text")
-                .setAutoCancel(true)
-                .setPriority(NotificationManager.IMPORTANCE_HIGH)
-                .setContentIntent(pendingIntent);  // Open this activity when the notification is pressed
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify("oneAndOnly", 1, mBuilder.build());
+//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+//        notificationManager.notify("oneAndOnly", 1, mBuilder.build());
 
 
     }
