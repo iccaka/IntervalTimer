@@ -15,7 +15,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <TextView
@@ -25,7 +25,7 @@
                 android:layout_marginTop="36dp"
                 android:layout_weight="1"
                 android:gravity="center_horizontal"
-                android:text="12"
+                android:text="@string/starting_sets_timer"
                 android:textColor="#000"
                 android:textSize="36sp" />
 
@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center_horizontal"
-                android:text="01 : 30"
+                android:text="@string/starting_work"
                 android:textColor="#000"
                 android:textSize="66sp" />
 
@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center_horizontal"
-                android:text="00 : 30"
+                android:text="@string/starting_rest"
                 android:textColor="#000"
                 android:textSize="66sp" />
 
@@ -55,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center_horizontal"
-                android:text="Work It"
+                android:text="@string/text_motivational_timer"
                 android:textAllCaps="true"
                 android:textColor="#fff"
                 android:textSize="46sp" />
@@ -66,7 +66,7 @@
                 android:layout_height="80dp"
                 android:layout_weight="1"
                 android:onClick="pauseTimer"
-                android:text="Pause"
+                android:text="@string/btn_pause"
                 android:textAllCaps="true" />
 
             <Button
@@ -75,7 +75,7 @@
                 android:layout_height="80dp"
                 android:layout_weight="1"
                 android:onClick="continueTimer"
-                android:text="Continue"
+                android:text="@string/btn_continue"
                 android:textAllCaps="true" />
 
             <Button
@@ -83,7 +83,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_weight="1"
-                android:text="Hold To End"
+                android:text="@string/btn_end"
                 android:textAllCaps="true" />
         </LinearLayout>
 

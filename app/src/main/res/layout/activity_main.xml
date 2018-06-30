@@ -31,7 +31,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_horizontal"
-                    android:text="Sets"
+                    android:text="@string/text_sets"
                     android:textColor="#000"
                     android:textSize="26sp" />
 
@@ -53,7 +53,7 @@
                         android:layout_weight="1"
                         android:background="#ffffff"
                         android:onClick="decrementSets"
-                        android:text="-" />
+                        android:text="@string/sign_minus" />
 
                     <TextView
                         android:id="@+id/setsQuantity"
@@ -62,7 +62,7 @@
                         android:layout_weight="3"
                         android:freezesText="true"
                         android:gravity="center_horizontal"
-                        android:text="  12   "
+                        android:text="@string/starting_sets_main"
                         android:textColor="#000"
                         android:textSize="26sp" />
 
@@ -73,7 +73,7 @@
                         android:layout_weight="1"
                         android:background="#ffffff"
                         android:onClick="incrementSets"
-                        android:text="+" />
+                        android:text="@string/sign_plus" />
 
                 </LinearLayout>
 
@@ -99,7 +99,7 @@
                     android:layout_marginTop="8dp"
                     android:layout_weight="1"
                     android:gravity="center_horizontal"
-                    android:text="Work Interval"
+                    android:text="@string/text_work"
                     android:textColor="#000"
                     android:textSize="26sp"
                     app:layout_constraintTop_toBottomOf="@+id/setsLinear" />
@@ -122,7 +122,7 @@
                         android:layout_weight="1"
                         android:background="#ffffff"
                         android:onClick="decrementWork"
-                        android:text="-" />
+                        android:text="@string/sign_minus" />
 
                     <TextView
                         android:id="@+id/workQuantity"
@@ -131,7 +131,7 @@
                         android:layout_weight="3"
                         android:freezesText="true"
                         android:gravity="center_horizontal"
-                        android:text="01 : 30"
+                        android:text="@string/starting_work"
                         android:textColor="#000"
                         android:textSize="26sp" />
 
@@ -142,7 +142,7 @@
                         android:layout_weight="1"
                         android:background="#ffffff"
                         android:onClick="incrementWork"
-                        android:text="+" />
+                        android:text="@string/sign_plus" />
 
                 </LinearLayout>
 
@@ -168,7 +168,7 @@
                     android:layout_marginTop="8dp"
                     android:layout_weight="1"
                     android:gravity="center_horizontal"
-                    android:text="Rest Interval"
+                    android:text="@string/text_rest"
                     android:textColor="#000"
                     android:textSize="26sp"
                     app:layout_constraintTop_toBottomOf="@+id/workLinear" />
@@ -191,7 +191,7 @@
                         android:layout_weight="1"
                         android:background="#ffffff"
                         android:onClick="decrementRest"
-                        android:text="-" />
+                        android:text="@string/sign_minus" />
 
                     <TextView
                         android:id="@+id/restQuantity"
@@ -200,7 +200,7 @@
                         android:layout_weight="3"
                         android:freezesText="true"
                         android:gravity="center_horizontal"
-                        android:text="00 : 30"
+                        android:text="@string/starting_rest"
                         android:textColor="#000"
                         android:textSize="26sp" />
 
@@ -211,7 +211,7 @@
                         android:layout_weight="1"
                         android:background="#ffffff"
                         android:onClick="incrementRest"
-                        android:text="+" />
+                        android:text="@string/sign_plus" />
 
                 </LinearLayout>
 
@@ -232,7 +232,7 @@
                 android:layout_marginTop="16dp"
                 android:background="#ffffff"
                 android:onClick="timerStart"
-                android:text="Start"
+                android:text="@string/btn_start"
                 android:textAlignment="center"
                 android:textStyle="bold"
                 android:visibility="visible" />

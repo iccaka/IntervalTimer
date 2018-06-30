@@ -121,6 +121,9 @@ public class MainActivity extends Activity {
             //set the parameters by reading their values from the 'parameters' file
             this.setParameters();
         }
+        else {
+            initializeDefaultParameters();
+        }
     }
 
     @Override
