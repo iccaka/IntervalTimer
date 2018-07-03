@@ -8,12 +8,13 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.dev.iccaka.intervaltimer.Exceptions.DirectoryNotFoundException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -157,7 +158,7 @@ public class MainActivity extends Activity {
 
         // get the 'parameters' file, from where we will read the values of the parameters
         File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
-//        FileReader reader = new FileReader(gpxfile);
+        // FileReader reader = new FileReader(gpxfile);
         FileInputStream fis = new FileInputStream(gpxfile);
 
         StringBuilder builder = new StringBuilder();
@@ -260,6 +261,7 @@ public class MainActivity extends Activity {
         return false;
     }
 
+    // Checks if the user had given permission for us to access his/her storage
     private boolean isExternalStorageAccessPermissionGranted() {
         String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
         int result = getApplicationContext().checkCallingOrSelfPermission(permission);
@@ -403,23 +405,14 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-//    // Method just to request permission for reading inside the external storage
-//    // After we receive a result from this method, we go to 'onRequestPermissionResult'
-//    private void requestReadStoragePermission() {
-//        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
-//    }
-
     // Method just to request permission for writing inside the external storage (it also receives reading permission)
     // After we receive a result from this method, we go to 'onRequestPermissionResult'
     public void requestWriteStoragePermission() {
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
     }
 
-    /* Method that gets invoked and handles permission results differently
-       ('requestCode' 1 is when we enable both write and read a.k.a when we start the
-       timer, 2 is only at the begging of the application, where we only
-       want to read the values of the parameters from the 'parameters file',
-       at 'requestReadStoragePermission' method)
+    /* Method that gets invoked and handles permission results differently ('requestCode'
+       1 is when we enable both write and read a.k.a when we start the timer)
     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -432,20 +425,6 @@ public class MainActivity extends Activity {
                     Toast.makeText(MainActivity.this, "The app won't be able to save your values", Toast.LENGTH_SHORT).show();
                 }
                 break;
-
-//            case 2:
-//                // if the 'read only' permission was granted
-//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    try {
-//                        this.setParameters();
-//                    } catch (FileNotFoundException e) {
-//                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-//                    }
-//                } else { // if the permission wasn't granted a.k.a we can't read
-//                    Toast.makeText(MainActivity.this, "The app won't be able to read your previous values", Toast.LENGTH_SHORT).show();
-//                    this.initializeDefaultParameters();
-//                    Toast.makeText(this.getApplicationContext(), "Initialized the default values.", Toast.LENGTH_LONG).show();
-//                }
         }
     }
 
