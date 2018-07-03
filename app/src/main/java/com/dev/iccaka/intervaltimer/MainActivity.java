@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,8 +36,8 @@ public class MainActivity extends Activity {
     //========================================================
 
     // Views from activity_main.xml
-    private TextView setsTextView;
-    private TextView workTextView;
+    private TextSettable setsTextView;
+    private TextSettable workTextView;
     private TextView restTextView;
     private Button setsMinusBtn;
     private Button setsPlusBtn;

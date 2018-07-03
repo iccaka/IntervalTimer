@@ -3,6 +3,9 @@ package com.dev.iccaka.intervaltimer;
 import android.os.CountDownTimer;
 
 public class CustomTimer extends CountDownTimer {
+
+    private boolean hasBeenStopped;
+
     /**
      * @param millisInFuture    The number of millis in the future from the call
      *                          to {@link #start()} until the countdown is done and {@link #onFinish()}
