@@ -14,7 +14,6 @@ public class RepeatListener implements OnTouchListener {
     private int initialInterval;
     private final int normalInterval;
     private final OnClickListener clickListener;
-
     private Runnable handlerRunnable = new Runnable() {
         @Override
         public void run() {
@@ -62,5 +61,4 @@ public class RepeatListener implements OnTouchListener {
 
         return false;
     }
-
 }

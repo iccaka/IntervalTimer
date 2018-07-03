@@ -72,42 +72,12 @@ public class MainActivity extends Activity {
         //========================================================
 
         //attach listeners to all buttons
-        this.setsPlusBtn.setOnTouchListener(new RepeatListener(600, 50, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setsPlusBtn.performClick();
-            }
-        }));
-        this.setsMinusBtn.setOnTouchListener(new RepeatListener(600, 50, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setsMinusBtn.performClick();
-            }
-        }));
-        this.workPlusBtn.setOnTouchListener(new RepeatListener(600, 25, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                workPlusBtn.performClick();
-            }
-        }));
-        this.workMinusBtn.setOnTouchListener(new RepeatListener(600, 25, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                workMinusBtn.performClick();
-            }
-        }));
-        this.restPlusBtn.setOnTouchListener(new RepeatListener(600, 25, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                restPlusBtn.performClick();
-            }
-        }));
-        this.restMinusBtn.setOnTouchListener(new RepeatListener(600, 25, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                restMinusBtn.performClick();
-            }
-        }));
+        this.setsPlusBtn.setOnTouchListener(new RepeatListener(600, 50, v -> setsPlusBtn.performClick()));
+        this.setsMinusBtn.setOnTouchListener(new RepeatListener(600, 50, v -> setsMinusBtn.performClick()));
+        this.workPlusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> workPlusBtn.performClick()));
+        this.workMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> workMinusBtn.performClick()));
+        this.restPlusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restPlusBtn.performClick()));
+        this.restMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restMinusBtn.performClick()));
         //========================================================
 
 
