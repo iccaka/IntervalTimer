@@ -8,16 +8,14 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.dev.iccaka.intervaltimer.Exceptions.DirectoryNotFoundException;
-
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,6 +77,16 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 setsPlusBtn.performClick();
             }
+
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_UP:
+                        writeParameters();
+                        return true;
+                }
+
+                return false;
+            }
         }));
         this.setsMinusBtn.setOnTouchListener(new RepeatListener(600, 50, new View.OnClickListener() {
             @Override
@@ -120,8 +128,7 @@ public class MainActivity extends Activity {
         if (this.isExternalStorageAccessPermissionGranted()) {
             //set the parameters by reading their values from the 'parameters' file
             this.setParameters();
-        }
-        else {
+        } else {
             initializeDefaultParameters();
         }
     }
@@ -130,6 +137,8 @@ public class MainActivity extends Activity {
     protected void onStart() {
 
         super.onStart();
+
+        this.setParameters();
 
         //get the information on the screen via the custom methods
         this.updateData();
@@ -193,10 +202,10 @@ public class MainActivity extends Activity {
 
         StringBuilder builder = new StringBuilder();
 
-        while(true){
+        while (true) {
             int currChar = fis.read();
 
-            if(currChar == -1){
+            if (currChar == -1) {
                 break;
             }
 
@@ -209,6 +218,8 @@ public class MainActivity extends Activity {
             parameters.add(Integer.parseInt(value));
         }
 
+        fis.close();
+
         return Collections.unmodifiableList(parameters);
     }
 
@@ -217,6 +228,7 @@ public class MainActivity extends Activity {
         // get the current values of the parameters and put them into an 'Integer' list
         List<Integer> parameters = this.getParameters();
 
+        // create a StringBuilder where we'll put our data about the parameters
         StringBuilder result = new StringBuilder();
 
         // create a string using the template('sets' 'workSecs' 'workMin' 'restSecs' 'restMins')
@@ -224,8 +236,8 @@ public class MainActivity extends Activity {
             result.append(a).append(" ");
         }
 
-        // check if the external storage is accessible, using the custom
-        // 'isExternalStorageWritable' method, so we can write to the parameters file
+        /* check if the external storage is accessible, using the custom
+           'isExternalStorageWritable' method, so we can write to the parameters file */
         if (this.isExternalStorageWritable()) {
             try {
                 // create a new directory inside the external storage
@@ -296,7 +308,7 @@ public class MainActivity extends Activity {
     }
 
     // Custom methods to get the parameters on the screen
-    private void updateData(){
+    private void updateData() {
         this.updateSets();
         this.updateWork();
         this.updateRest();
@@ -499,7 +511,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == MainActivity.START_TIMER && resultCode == RESULT_OK){
+        if (requestCode == MainActivity.START_TIMER && resultCode == RESULT_OK) {
             if (this.isExternalStorageAccessPermissionGranted()) {
                 //set the parameters by reading their values from the 'parameters' file
                 this.setParameters();
