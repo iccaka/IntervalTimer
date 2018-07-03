@@ -77,16 +77,6 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 setsPlusBtn.performClick();
             }
-
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_UP:
-                        writeParameters();
-                        return true;
-                }
-
-                return false;
-            }
         }));
         this.setsMinusBtn.setOnTouchListener(new RepeatListener(600, 50, new View.OnClickListener() {
             @Override
