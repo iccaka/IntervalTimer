@@ -54,7 +54,6 @@ public class MainActivity extends Activity {
     private static final String DEFAULT_FILE_NAME = "parameters";
     private static final int START_TIMER = 1;
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
         super.onCreate(savedInstanceState);

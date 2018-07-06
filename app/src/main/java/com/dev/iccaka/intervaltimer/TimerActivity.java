@@ -95,17 +95,41 @@ public class TimerActivity extends Activity {
         this.thisActivity.setBackgroundColor(Color.RED);
 
         Bundle mainActivityBundle = getIntent().getExtras();
-
-//        if(savedInstanceState == null){
         this.sets = mainActivityBundle.getInt("sets");
         this.workSecs = mainActivityBundle.getInt("workSecs");
         this.workMins = mainActivityBundle.getInt("workMins");
         this.restSecs = mainActivityBundle.getInt("restSecs");
         this.restMins = mainActivityBundle.getInt("restMins");
-        /*}
-        else{
 
-        }*/
+        this.workCountDownTimer = new CountDownTimer((((this.workMins * 60) + this.workSecs) * 1000), 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                decrementWork(trainingWorkQuantity);
+            }
+
+            @Override
+            public void onFinish() {
+                decrementSets(trainingSetsQuantity);
+                startRestTimer();
+            }
+        };
+        this.restCountDownTimer = new CountDownTimer((((this.restMins * 60) + this.restSecs) * 1000), 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                decrementRest(trainingRestQuantity);
+            }
+
+            @Override
+            public void onFinish() {
+                if (sets > 0) {
+                    startWorkTimer();
+                } else {
+                    endTimer(endBtn);
+                }
+            }
+        };
 
         this.startingSets = this.sets;
         this.startingWorkSecs = this.workSecs;
@@ -129,6 +153,15 @@ public class TimerActivity extends Activity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        this.updateData();
+
+        this.startWorkTimer();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
 
     }
@@ -137,52 +170,6 @@ public class TimerActivity extends Activity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
 
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        this.updateSets();
-        this.updateWork();
-        this.updateRest();
-
-        this.workCountDownTimer = new CountDownTimer((((this.workMins * 60) + this.workSecs) * 1000) + 2, 1000) {
-
-            @Override
-            public void onTick(long millisUntilFinished) {
-                decrementWork(trainingWorkQuantity);
-                updateWork();
-            }
-
-            @Override
-            public void onFinish() {
-                decrementSets(trainingSetsQuantity);
-                updateSets();
-                startRestTimer();
-            }
-        };
-
-        this.restCountDownTimer = new CountDownTimer((((this.restMins * 60) + this.restSecs) * 1000) + 2, 1000) {
-
-            @Override
-            public void onTick(long millisUntilFinished) {
-                decrementRest(trainingRestQuantity);
-                updateRest();
-            }
-
-            @Override
-            public void onFinish() {
-                if (sets > 0) {
-                    startWorkTimer();
-                } else {
-                    endTimer(endBtn);
-                }
-            }
-        };
-
-
-        this.startWorkTimer();
     }
 
     private void createNotificationChannel() {
@@ -214,6 +201,7 @@ public class TimerActivity extends Activity {
         this.workCountDownTimer.start();
     }
 
+    // A method used to start the rest timer a.k.a the timer stars when it's time for you to do a lightweight exercise, for example
     private void startRestTimer() {
 
         if (this.startingRestSecs > 0) {
@@ -237,7 +225,7 @@ public class TimerActivity extends Activity {
     }
     //========================================================
 
-    // Methods to properly increment the parameters when you click on their corresponding buttons
+    // Methods to properly decrement the parameters when you click on their corresponding buttons
     private void decrementWork(View view) {
         if (this.workMins == 0 && this.workSecs == 1) {
             return;
@@ -288,6 +276,12 @@ public class TimerActivity extends Activity {
     //========================================================
 
     // Custom methods to get the parameters on the screen
+    private void updateData(){  // A bigger method that 'concatenates' the 3 other smaller ones so it doesn't take a lot of space when you try to invoke all of them at once
+        this.updateSets();
+        this.updateWork();
+        this.updateRest();
+    }
+
     @SuppressLint("SetTextI18n")
     private void updateSets() {
         if (this.sets > 9) {
@@ -333,7 +327,7 @@ public class TimerActivity extends Activity {
         this.pausedRestMins = this.restMins;
     }
 
-    // Methods to continue, pause and end the timers
+    // Methods to continue, pause or end the timers
     public void continueTimer(View view) {
         this.mpToResume.start();
 
@@ -413,6 +407,7 @@ public class TimerActivity extends Activity {
     }
     //========================================================
 
+    // The method that exits the current activity for us
     @Override
     public void onBackPressed() {
 
