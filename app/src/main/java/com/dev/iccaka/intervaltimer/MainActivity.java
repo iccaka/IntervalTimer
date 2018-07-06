@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,8 +35,8 @@ public class MainActivity extends Activity {
     //========================================================
 
     // Views from activity_main.xml
-    private TextSettable setsTextView;
-    private TextSettable workTextView;
+    private TextView setsTextView;
+    private TextView workTextView;
     private TextView restTextView;
     private Button setsMinusBtn;
     private Button setsPlusBtn;
@@ -240,7 +239,7 @@ public class MainActivity extends Activity {
         this.restMins = DEFAULT_REST_MINS;
     }
 
-    // Checks if the external storage is available for read and write
+    // Checks if the externa l storage is available for read and write
     private boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
 
