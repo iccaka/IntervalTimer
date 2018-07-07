@@ -267,9 +267,7 @@ public class TimerActivity extends Activity {
     }
 
     private void decrementSets(View view) {
-        if (this.sets > 1) {
-            this.sets--;
-        }
+        this.sets--;
 
         this.updateSets();
     }
