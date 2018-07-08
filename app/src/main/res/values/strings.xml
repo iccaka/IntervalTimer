@@ -17,6 +17,8 @@
     <string name="text_work">Work Interval</string>
     <string name="text_rest">Rest Interval</string>
     <string name="text_motivational_timer">Work It</string>
+    <string name="text_motivational_timer_2">Rest Now</string>
+    <string name="text_paused_timer">Paused</string>
     <string name="btn_start">Start</string>
     <string name="btn_end">Hold To End</string>
     <string name="btn_continue">Continue</string>
