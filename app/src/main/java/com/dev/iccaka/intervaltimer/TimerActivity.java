@@ -73,113 +73,6 @@ public class TimerActivity extends Activity {
     private boolean hasWorkBeenPaused;
     //========================================================
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_timer);
-
-        // assign the default values to the 3 booleans
-        this.isWorkOn = true;
-        this.hasRestBeenPaused = false;
-        this.hasWorkBeenPaused = false;
-
-        // get the view using 'findViewById' and the 'R' class
-        this.continueBtn = findViewById(R.id.continueBtn);
-        this.pauseBtn = findViewById(R.id.pauseBtn);
-        this.endBtn = findViewById(R.id.endBtn);
-        this.thisActivity = findViewById(R.id.timerActivity);
-        this.trainingSetsQuantity = findViewById(R.id.trainingSetsQuantity);
-        this.trainingWorkQuantity = findViewById(R.id.trainingWorkQuantity);
-        this.trainingMotivationalText = findViewById(R.id.trainingMotivationalText);
-        this.trainingRestQuantity = findViewById(R.id.trainingRestQuantity);
-        this.trainingPausedText = findViewById(R.id.trainingPausedText);
-
-        // set a bunch of different visibilities to the view so we don't see redundant views
-        this.endBtn.setVisibility(View.GONE);
-        this.continueBtn.setVisibility(View.GONE);
-        this.trainingRestQuantity.setVisibility(View.GONE);
-        this.trainingPausedText.setVisibility(View.GONE);
-
-        // get the 'Bundle' that was passed to us from the MainActivity class a.k.a get the values of the parameters so we know how long should the timers be
-        Bundle mainActivityBundle = getIntent().getExtras();
-        this.sets = mainActivityBundle.getInt("sets");
-        this.workSecs = mainActivityBundle.getInt("workSecs");
-        this.workMins = mainActivityBundle.getInt("workMins");
-        this.restSecs = mainActivityBundle.getInt("restSecs");
-        this.restMins = mainActivityBundle.getInt("restMins");
-
-        // create the two timers a.k.a work and rest
-        this.workCountDownTimer = new CountDownTimer((((this.workMins * 60) + this.workSecs) * 1000), 1000) {
-
-            @Override
-            public void onTick(long millisUntilFinished) {
-                // every second decrement the work seconds
-                decrementWork(trainingWorkQuantity);
-            }
-
-            @Override
-            public void onFinish() {
-                // at the end decrement the sets and start the rest timer
-                decrementSets(trainingSetsQuantity);
-                startRestTimer();
-            }
-        };
-        this.restCountDownTimer = new CountDownTimer((((this.restMins * 60) + this.restSecs) * 1000), 1000) {
-
-            @Override
-            public void onTick(long millisUntilFinished) {
-                // every second decrement the work seconds
-                decrementRest(trainingRestQuantity);
-            }
-
-            @Override
-            public void onFinish() {
-                // at the end if there aren't anymore sets - end the timer a.k.a end the whole activity since we don't have any work to do
-                if (sets > 0) {
-                    // ... or just start the work timer and continue with the work
-                    startWorkTimer();
-                } else {
-                    endTimer(endBtn);
-                }
-            }
-        };
-
-        // assing the proper values to the 'starting' parameters, so we always know from where have started
-        this.startingSets = this.sets;
-        this.startingWorkSecs = this.workSecs;
-        this.startingWorkMins = this.workMins;
-        this.startingRestSecs = this.restSecs;
-        this.startingRestMins = this.restMins;
-
-        // get the proper sounds from the 'res/raw' folder and assign them to the corresponding fields
-        this.mpToWork = MediaPlayer.create(this.getApplicationContext(), R.raw.work);
-        this.mpToRest = MediaPlayer.create(this.getApplicationContext(), R.raw.rest);
-        this.mpToPause = MediaPlayer.create(this.getApplicationContext(), R.raw.pause);
-        this.mpToResume = MediaPlayer.create(this.getApplicationContext(), R.raw.resume);
-        this.mpToEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.end);
-        this.mpToFullyEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.fullyend);
-
-        // set an event to the 'end' button, because it has to be a long one, not a normal one
-        this.endBtn.setOnLongClickListener(v -> {
-            endTimer(new View(this.getApplicationContext()));
-            return false;
-        });
-
-        // create the notification channel, so we can have a notification
-        this.createNotificationChannel();
-
-        // finally start the work timer
-        this.startWorkTimer();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        this.updateData();
-
-    }
-
     private void createNotificationChannel() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -360,6 +253,113 @@ public class TimerActivity extends Activity {
         this.pausedWorkMins = this.workMins;
         this.pausedRestSecs = this.restSecs;
         this.pausedRestMins = this.restMins;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_timer);
+
+        // assign the default values to the 3 booleans
+        this.isWorkOn = true;
+        this.hasRestBeenPaused = false;
+        this.hasWorkBeenPaused = false;
+
+        // get the view using 'findViewById' and the 'R' class
+        this.continueBtn = findViewById(R.id.continueBtn);
+        this.pauseBtn = findViewById(R.id.pauseBtn);
+        this.endBtn = findViewById(R.id.endBtn);
+        this.thisActivity = findViewById(R.id.timerActivity);
+        this.trainingSetsQuantity = findViewById(R.id.trainingSetsQuantity);
+        this.trainingWorkQuantity = findViewById(R.id.trainingWorkQuantity);
+        this.trainingMotivationalText = findViewById(R.id.trainingMotivationalText);
+        this.trainingRestQuantity = findViewById(R.id.trainingRestQuantity);
+        this.trainingPausedText = findViewById(R.id.trainingPausedText);
+
+        // set a bunch of different visibilities to the view so we don't see redundant views
+        this.endBtn.setVisibility(View.GONE);
+        this.continueBtn.setVisibility(View.GONE);
+        this.trainingRestQuantity.setVisibility(View.GONE);
+        this.trainingPausedText.setVisibility(View.GONE);
+
+        // get the 'Bundle' that was passed to us from the MainActivity class a.k.a get the values of the parameters so we know how long should the timers be
+        Bundle mainActivityBundle = getIntent().getExtras();
+        this.sets = mainActivityBundle.getInt("sets");
+        this.workSecs = mainActivityBundle.getInt("workSecs");
+        this.workMins = mainActivityBundle.getInt("workMins");
+        this.restSecs = mainActivityBundle.getInt("restSecs");
+        this.restMins = mainActivityBundle.getInt("restMins");
+
+        // create the two timers a.k.a work and rest
+        this.workCountDownTimer = new CountDownTimer((((this.workMins * 60) + this.workSecs) * 1000), 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                // every second decrement the work seconds
+                decrementWork(trainingWorkQuantity);
+            }
+
+            @Override
+            public void onFinish() {
+                // at the end decrement the sets and start the rest timer
+                decrementSets(trainingSetsQuantity);
+                startRestTimer();
+            }
+        };
+        this.restCountDownTimer = new CountDownTimer((((this.restMins * 60) + this.restSecs) * 1000), 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                // every second decrement the work seconds
+                decrementRest(trainingRestQuantity);
+            }
+
+            @Override
+            public void onFinish() {
+                // at the end if there aren't anymore sets - end the timer a.k.a end the whole activity since we don't have any work to do
+                if (sets > 0) {
+                    // ... or just start the work timer and continue with the work
+                    startWorkTimer();
+                } else {
+                    endTimer(endBtn);
+                }
+            }
+        };
+
+        // assing the proper values to the 'starting' parameters, so we always know from where have started
+        this.startingSets = this.sets;
+        this.startingWorkSecs = this.workSecs;
+        this.startingWorkMins = this.workMins;
+        this.startingRestSecs = this.restSecs;
+        this.startingRestMins = this.restMins;
+
+        // get the proper sounds from the 'res/raw' folder and assign them to the corresponding fields
+        this.mpToWork = MediaPlayer.create(this.getApplicationContext(), R.raw.work);
+        this.mpToRest = MediaPlayer.create(this.getApplicationContext(), R.raw.rest);
+        this.mpToPause = MediaPlayer.create(this.getApplicationContext(), R.raw.pause);
+        this.mpToResume = MediaPlayer.create(this.getApplicationContext(), R.raw.resume);
+        this.mpToEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.end);
+        this.mpToFullyEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.fullyend);
+
+        // set an event to the 'end' button, because it has to be a long one, not a normal one
+        this.endBtn.setOnLongClickListener(v -> {
+            endTimer(new View(this.getApplicationContext()));
+            return false;
+        });
+
+        // create the notification channel, so we can have a notification
+        this.createNotificationChannel();
+
+        // finally start the work timer
+        this.startWorkTimer();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        this.updateData();
+
     }
 
     // Methods to continue, pause or end the timers

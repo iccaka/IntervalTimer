@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.widget.Button;
@@ -46,63 +47,15 @@ public class MainActivity extends Activity {
     private Button restPlusBtn;
     //========================================================
 
-    private static final int DEFAULT_SETS = 12;
-    private static final int DEFAULT_WORK_SECS = 30;
-    private static final int DEFAULT_WORK_MINS = 1;
-    private static final int DEFAULT_REST_SECS = 30;
-    private static final int DEFAULT_REST_MINS = 0;
-    private static final String DEFAULT_FILE_NAME = "parameters";
-    private static final int START_TIMER = 1;
+    private boolean isBackPressedTwice;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        //get the views from the R class
-        this.setsMinusBtn = findViewById(R.id.setsMinusBtn);
-        this.setsPlusBtn = findViewById(R.id.setsPlusBtn);
-        this.workMinusBtn = findViewById(R.id.workMinusBtn);
-        this.workPlusBtn = findViewById(R.id.workPlusBtn);
-        this.restMinusBtn = findViewById(R.id.restMinusBtn);
-        this.restPlusBtn = findViewById(R.id.restPlusBtn);
-        this.setsTextView = findViewById(R.id.setsQuantity);
-        this.workTextView = findViewById(R.id.workQuantity);
-        this.restTextView = findViewById(R.id.restQuantity);
-        //========================================================
-
-        //attach listeners to all buttons
-        this.setsPlusBtn.setOnTouchListener(new RepeatListener(600, 50, v -> setsPlusBtn.performClick()));
-        this.setsMinusBtn.setOnTouchListener(new RepeatListener(600, 50, v -> setsMinusBtn.performClick()));
-        this.workPlusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> workPlusBtn.performClick()));
-        this.workMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> workMinusBtn.performClick()));
-        this.restPlusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restPlusBtn.performClick()));
-        this.restMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restMinusBtn.performClick()));
-        //========================================================
-
-
-        if (!this.isExternalStorageAccessPermissionGranted()) {
-            this.requestWriteStoragePermission();
-        }
-
-        if (this.isExternalStorageAccessPermissionGranted()) {
-            //set the parameters by reading their values from the 'parameters' file
-            this.setParameters();
-        } else {
-            initializeDefaultParameters();
-        }
-    }
-
-    @Override
-    protected void onStart() {
-
-        super.onStart();
-
-        this.setParameters();
-
-        //get the information on the screen via the custom methods
-        this.updateData();
-    }
+    public static final int DEFAULT_SETS = 12;
+    public static final int DEFAULT_WORK_SECS = 30;
+    public static final int DEFAULT_WORK_MINS = 1;
+    public static final int DEFAULT_REST_SECS = 30;
+    public static final int DEFAULT_REST_MINS = 0;
+    public static final String DEFAULT_FILE_NAME = "parameters";
+    public static final int START_TIMER = 1;
 
     // Methods to read or write the parameters to the corresponding file
     private void setParameters() {
@@ -312,6 +265,71 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
+    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        this.isBackPressedTwice = false;
+
+        //get the views from the R class
+        this.setsMinusBtn = findViewById(R.id.setsMinusBtn);
+        this.setsPlusBtn = findViewById(R.id.setsPlusBtn);
+        this.workMinusBtn = findViewById(R.id.workMinusBtn);
+        this.workPlusBtn = findViewById(R.id.workPlusBtn);
+        this.restMinusBtn = findViewById(R.id.restMinusBtn);
+        this.restPlusBtn = findViewById(R.id.restPlusBtn);
+        this.setsTextView = findViewById(R.id.setsQuantity);
+        this.workTextView = findViewById(R.id.workQuantity);
+        this.restTextView = findViewById(R.id.restQuantity);
+        //========================================================
+
+        //attach listeners to all buttons
+        this.setsPlusBtn.setOnTouchListener(new RepeatListener(600, 50, v -> setsPlusBtn.performClick()));
+        this.setsMinusBtn.setOnTouchListener(new RepeatListener(600, 50, v -> setsMinusBtn.performClick()));
+        this.workPlusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> workPlusBtn.performClick()));
+        this.workMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> workMinusBtn.performClick()));
+        this.restPlusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restPlusBtn.performClick()));
+        this.restMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restMinusBtn.performClick()));
+        //========================================================
+
+
+        if (!this.isExternalStorageAccessPermissionGranted()) {
+            this.requestWriteStoragePermission();
+        }
+
+        if (this.isExternalStorageAccessPermissionGranted()) {
+            //set the parameters by reading their values from the 'parameters' file
+            this.setParameters();
+        } else {
+            initializeDefaultParameters();
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+
+        this.setParameters();
+
+        //get the information on the screen via the custom methods
+        this.updateData();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == MainActivity.START_TIMER && resultCode == RESULT_OK) {
+            if (this.isExternalStorageAccessPermissionGranted()) {
+                //set the parameters by reading their values from the 'parameters' file
+                this.setParameters();
+                this.updateData();
+            }
+        }
+    }
+
     // Methods to properly increment the parameters when you click on their corresponding buttons
     public void incrementSets(View view) {
         this.sets++;
@@ -410,23 +428,6 @@ public class MainActivity extends Activity {
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
     }
 
-    /* Method that gets invoked and handles permission results differently ('requestCode'
-       1 is when we enable both write and read a.k.a when we start the timer)
-    */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case 1:
-                // if the write permission was granted
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                } else { // if the permission wasn't granted a.k.a we can't write
-                    Toast.makeText(MainActivity.this, "The app won't be able to save your values", Toast.LENGTH_SHORT).show();
-                }
-                break;
-        }
-    }
-
     // Method to start the timer and pass the parameters to the TimerActivity class
     public void timerStart(View view) {
 
@@ -447,15 +448,36 @@ public class MainActivity extends Activity {
 
     }
 
+    /* Method that gets invoked and handles permission results differently ('requestCode'
+       1 is when we enable both write and read a.k.a when we start the timer)
+    */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == MainActivity.START_TIMER && resultCode == RESULT_OK) {
-            if (this.isExternalStorageAccessPermissionGranted()) {
-                //set the parameters by reading their values from the 'parameters' file
-                this.setParameters();
-                this.updateData();
-            }
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1:
+                // if the write permission was granted
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                } else { // if the permission wasn't granted a.k.a we can't write
+                    Toast.makeText(MainActivity.this, "The app won't be able to save your values", Toast.LENGTH_SHORT).show();
+                }
+                break;
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        // if the 'isBackPressedTwice' boolean is 'true', invoke the super method which only exits the activity
+        if (this.isBackPressedTwice) {
+            super.onBackPressed();
+        }
+        else {
+            //... if it isn't pressed, make the boolen 'true' and show a 'Toast' with a message
+            this.isBackPressedTwice = true;
+            Toast.makeText(MainActivity.this, "Press BACK once again to exit", Toast.LENGTH_LONG).show();
+
+            // start a 'Handler' and if we don't press 'BACK' again in 2 seconds, the boolean gets back to 'false' and the whole thing starts again after we press 'BACK'
+            new Handler().postDelayed(() -> isBackPressedTwice = false, 2000);
+        }
+    }
 }
