@@ -466,7 +466,7 @@ public class TimerActivity extends Activity {
         }
 
         // set the result for MainActivity to 'RESULT_OK', meaning everything went fine
-        setResult(MainActivity.RESULT_OK);
+        setResult(RESULT_OK);
 
         // finally finish the activity and head back to MainActivity
         this.finish();

@@ -319,11 +319,16 @@ public class MainActivity extends Activity {
         this.updateData();
     }
 
+    /* Method that gets invoked once we stop using the 'TimerActivity';
+    Once it gets a good result(RESULT_OK), we update the values of the
+    parameters and then update the data on the screen
+    */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // if the request code is the same as the one from the 'timerStart' method and if the result code is RESULT_OK, ...
         if (requestCode == MainActivity.START_TIMER && resultCode == RESULT_OK) {
             if (this.isExternalStorageAccessPermissionGranted()) {
-                //set the parameters by reading their values from the 'parameters' file
+                // ...set the parameters by reading their values from the 'parameters' file
                 this.setParameters();
                 this.updateData();
             }
@@ -423,7 +428,7 @@ public class MainActivity extends Activity {
     //========================================================
 
     // Method just to request permission for writing inside the external storage (it also receives reading permission)
-    // After we receive a result from this method, we go to 'onRequestPermissionResult'
+    // After we receive a result from this method, we go to 'onRequestPermissionsResult'
     public void requestWriteStoragePermission() {
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
     }
@@ -433,17 +438,17 @@ public class MainActivity extends Activity {
 
         this.writeParameters();
 
-        // create an Intent so we can start new activity
+        // create an 'Intent' so we can start new activity
         Intent intent = new Intent(this, TimerActivity.class);
 
-        // put the parameters' values inside the intent
+        // put the parameters' values inside the 'Intent'
         intent.putExtra("sets", this.sets);
         intent.putExtra("workSecs", this.workSecs);
         intent.putExtra("workMins", this.workMins);
         intent.putExtra("restSecs", this.restSecs);
         intent.putExtra("restMins", this.restMins);
 
-        // finally start the activity
+        // finally start the activity and wait for a result; Once we receive a result, 'onActivityResult' gets invoked.
         startActivityForResult(intent, MainActivity.START_TIMER);
 
     }
@@ -457,7 +462,7 @@ public class MainActivity extends Activity {
             case 1:
                 // if the write permission was granted
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                    this.onStart();
                 } else { // if the permission wasn't granted a.k.a we can't write
                     Toast.makeText(MainActivity.this, "The app won't be able to save your values", Toast.LENGTH_SHORT).show();
                 }
@@ -472,7 +477,7 @@ public class MainActivity extends Activity {
             super.onBackPressed();
         }
         else {
-            //... if it isn't pressed, make the boolen 'true' and show a 'Toast' with a message
+            //... if it isn't pressed, make the boolean 'true' and show a 'Toast' with a message
             this.isBackPressedTwice = true;
             Toast.makeText(MainActivity.this, "Press BACK once again to exit", Toast.LENGTH_LONG).show();
 
