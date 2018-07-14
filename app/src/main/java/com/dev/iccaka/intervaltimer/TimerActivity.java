@@ -279,7 +279,7 @@ public class TimerActivity extends Activity {
         // set a bunch of different visibilities to the view so we don't see redundant views
         this.endBtn.setVisibility(View.GONE);
         this.continueBtn.setVisibility(View.GONE);
-        this.trainingRestQuantity.setVisibility(View.GONE);
+//        this.trainingRestQuantity.setVisibility(View.GONE);
         this.trainingPausedText.setVisibility(View.GONE);
 
         // get the 'Bundle' that was passed to us from the MainActivity class a.k.a get the values of the parameters so we know how long should the timers be
@@ -326,7 +326,7 @@ public class TimerActivity extends Activity {
             }
         };
 
-        // assing the proper values to the 'starting' parameters, so we always know from where have started
+        // assign the proper values to the 'starting' parameters, so we always know from where have started
         this.startingSets = this.sets;
         this.startingWorkSecs = this.workSecs;
         this.startingWorkMins = this.workMins;

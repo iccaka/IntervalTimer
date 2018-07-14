@@ -55,6 +55,7 @@ public class MainActivity extends Activity {
     public static final int DEFAULT_REST_SECS = 30;
     public static final int DEFAULT_REST_MINS = 0;
     public static final String DEFAULT_FILE_NAME = "parameters";
+    // a static field used to start the timer activity and then wait for a result
     public static final int START_TIMER = 1;
 
     // Methods to read or write the parameters to the corresponding file
