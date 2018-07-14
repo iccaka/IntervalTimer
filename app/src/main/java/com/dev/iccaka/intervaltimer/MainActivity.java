@@ -228,6 +228,7 @@ public class MainActivity extends Activity {
         this.updateRest();
     }
 
+
     @SuppressLint("SetTextI18n")
     private void updateSets() {
         if (this.sets > 9) {
