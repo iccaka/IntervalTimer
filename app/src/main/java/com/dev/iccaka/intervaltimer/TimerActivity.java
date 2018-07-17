@@ -118,6 +118,7 @@ public class TimerActivity extends Activity {
 
         // finally start the work timer
         this.workCountDownTimer.start();
+
     }
 
     // A method used to start the rest timer a.k.a the timer stars when it's time for you to do a lightweight exercise, for example
