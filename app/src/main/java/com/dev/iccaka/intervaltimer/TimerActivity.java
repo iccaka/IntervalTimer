@@ -9,10 +9,12 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class TimerActivity extends Activity {
@@ -71,6 +73,7 @@ public class TimerActivity extends Activity {
     private boolean isWorkOn;
     private boolean hasRestBeenPaused;
     private boolean hasWorkBeenPaused;
+    private boolean isBackPressedTwice;
     //========================================================
 
     private void createNotificationChannel() {
@@ -87,7 +90,7 @@ public class TimerActivity extends Activity {
         }
     }
 
-    // Methods to starts the 2 timers
+    // Methods to start the 2 timers
     private void startWorkTimer() {
 
         // the work timer is going to be started, so we set 'isWorkOn' to true
@@ -121,8 +124,7 @@ public class TimerActivity extends Activity {
 
     }
 
-    // A method used to start the rest timer a.k.a the timer stars when it's time for you to do a lightweight exercise, for example
-    private void startRestTimer() {
+    private void startRestTimer() { // A method used to start the rest timer a.k.a the timer stars when it's time for you to do a lightweight exercise, for example
 
         // right now the work timer isn't working so we set 'isWorkOn' to false
         this.isWorkOn = false;
@@ -265,6 +267,7 @@ public class TimerActivity extends Activity {
         this.isWorkOn = true;
         this.hasRestBeenPaused = false;
         this.hasWorkBeenPaused = false;
+        this.isBackPressedTwice = false;
 
         // get the view using 'findViewById' and the 'R' class
         this.continueBtn = findViewById(R.id.continueBtn);
@@ -280,7 +283,7 @@ public class TimerActivity extends Activity {
         // set a bunch of different visibilities to the view so we don't see redundant views
         this.endBtn.setVisibility(View.GONE);
         this.continueBtn.setVisibility(View.GONE);
-//        this.trainingRestQuantity.setVisibility(View.GONE);
+        // this.trainingRestQuantity.setVisibility(View.GONE);
         this.trainingPausedText.setVisibility(View.GONE);
 
         // get the 'Bundle' that was passed to us from the MainActivity class a.k.a get the values of the parameters so we know how long should the timers be
@@ -458,6 +461,19 @@ public class TimerActivity extends Activity {
     @Override
     public void onBackPressed() {
 
+        // if the 'isBackPressedTwice' boolean is 'true', invoke the super method which only exits the activity
+        if (this.isBackPressedTwice) {
+            super.onBackPressed();
+        }
+        else {
+            //... if it isn't pressed, make the boolean 'true' and show a 'Toast' with a message
+            this.isBackPressedTwice = true;
+            Toast.makeText(TimerActivity.this, "Press BACK once again to exit", Toast.LENGTH_LONG).show();
+
+            // start a 'Handler' and if we don't press 'BACK' again in 2 seconds, the boolean gets back to 'false' and the whole thing starts again after we press 'BACK'
+            new Handler().postDelayed(() -> isBackPressedTwice = false, 2000);
+        }
+
         // cancel the timer depending on who is currently working
         if(this.isWorkOn){
             this.workCountDownTimer.cancel();
@@ -472,7 +488,7 @@ public class TimerActivity extends Activity {
         // finally finish the activity and head back to MainActivity
         this.finish();
 
-//
+
 //        Intent intent = new Intent(this, TimerActivity.class);
 //        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
