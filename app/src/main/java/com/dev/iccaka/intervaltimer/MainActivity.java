@@ -481,7 +481,7 @@ public class MainActivity extends Activity {
         else {
             //... if it isn't pressed, make the boolean 'true' and show a 'Toast' with a message
             this.isBackPressedTwice = true;
-            Toast.makeText(MainActivity.this, "Press BACK once again to exit", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "Press BACK once again to exit", Toast.LENGTH_SHORT).show();
 
             // start a 'Handler' and if we don't press 'BACK' again in 2 seconds, the boolean gets back to 'false' and the whole thing starts again after we press 'BACK'
             new Handler().postDelayed(() -> isBackPressedTwice = false, 2000);

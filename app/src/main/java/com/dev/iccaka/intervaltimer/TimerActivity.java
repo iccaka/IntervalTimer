@@ -64,7 +64,6 @@ public class TimerActivity extends Activity {
     private MediaPlayer mpToPause;
     private MediaPlayer mpToResume;
     private MediaPlayer mpToEnd;
-    private MediaPlayer mpToFullyEnd;
     //========================================================
 
     // Booleans to keep track if the work timer is currently working or not and if any of the timers has ever been paused
@@ -87,13 +86,13 @@ public class TimerActivity extends Activity {
         }
     }
 
-    // Methods to starts the 2 timers
+    // Methods to start the 2 timers
     private void startWorkTimer() {
 
         // the work timer is going to be started, so we set 'isWorkOn' to true
         this.isWorkOn = true;
 
-        // set the background color to red, so we can differentiate between work and rest
+        // set the background color to red, so we can differentiate between the work and the rest phase
         this.thisActivity.setBackgroundColor(Color.RED);
 
         // start the proper sound so we know when to rest
@@ -103,6 +102,21 @@ public class TimerActivity extends Activity {
         if (this.hasWorkBeenPaused) {
             this.workSecs = this.startingWorkSecs;
             this.workMins = this.startingWorkMins;
+
+            this.workCountDownTimer = new CountDownTimer((((this.workMins * 60) + this.workSecs) * 1000), 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    // every second decrement the work seconds
+                    decrementWork(trainingWorkQuantity);
+                }
+
+                @Override
+                public void onFinish() {
+                    // at the end decrement the sets and start the rest timer
+                    decrementSets(trainingSetsQuantity);
+                    startRestTimer();
+                }
+            };
 
             // then the timer should act like it hasn't been paused before
             this.hasWorkBeenPaused = false;
@@ -118,10 +132,10 @@ public class TimerActivity extends Activity {
 
         // finally start the work timer
         this.workCountDownTimer.start();
+
     }
 
-    // A method used to start the rest timer a.k.a the timer stars when it's time for you to do a lightweight exercise, for example
-    private void startRestTimer() {
+    private void startRestTimer() { // A method used to start the rest timer a.k.a the timer stars when it's time for you to do a lightweight exercise, for example
 
         // right now the work timer isn't working so we set 'isWorkOn' to false
         this.isWorkOn = false;
@@ -133,9 +147,28 @@ public class TimerActivity extends Activity {
         this.mpToRest.start();
 
         // if this timer has ever been paused - reset the parameters to their default values from MainActivity
-        if(this.hasRestBeenPaused){
+        if (this.hasRestBeenPaused) {
             this.restSecs = this.startingRestSecs;
             this.restMins = this.startingRestMins;
+
+            this.restCountDownTimer = new CountDownTimer((((this.restMins * 60) + this.restSecs) * 1000), 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    // every second decrement the work seconds
+                    decrementRest(trainingRestQuantity);
+                }
+
+                @Override
+                public void onFinish() {
+                    // at the end if there aren't anymore sets - end the timer a.k.a end the whole activity since we don't have any work to do
+                    if (sets > 0) {
+                        // ... or just start the work timer and continue with the work
+                        startWorkTimer();
+                    } else {
+                        endTimer(endBtn);
+                    }
+                }
+            };
 
             // then the timer should act like it hasn't been paused before
             this.hasRestBeenPaused = false;
@@ -249,9 +282,9 @@ public class TimerActivity extends Activity {
 
     private void updatePausedFields() {
         this.pausedSets = this.sets;
-        this.pausedWorkSecs = this.workSecs;
+        this.pausedWorkSecs = this.workSecs + 1;
         this.pausedWorkMins = this.workMins;
-        this.pausedRestSecs = this.restSecs;
+        this.pausedRestSecs = this.restSecs + 1;
         this.pausedRestMins = this.restMins;
     }
 
@@ -279,15 +312,15 @@ public class TimerActivity extends Activity {
         // set a bunch of different visibilities to the view so we don't see redundant views
         this.endBtn.setVisibility(View.GONE);
         this.continueBtn.setVisibility(View.GONE);
-//        this.trainingRestQuantity.setVisibility(View.GONE);
+        // this.trainingRestQuantity.setVisibility(View.GONE);
         this.trainingPausedText.setVisibility(View.GONE);
 
         // get the 'Bundle' that was passed to us from the MainActivity class a.k.a get the values of the parameters so we know how long should the timers be
         Bundle mainActivityBundle = getIntent().getExtras();
         this.sets = mainActivityBundle.getInt("sets");
-        this.workSecs = mainActivityBundle.getInt("workSecs");
+        this.workSecs = mainActivityBundle.getInt("workSecs") + 1;
         this.workMins = mainActivityBundle.getInt("workMins");
-        this.restSecs = mainActivityBundle.getInt("restSecs");
+        this.restSecs = mainActivityBundle.getInt("restSecs") + 1;
         this.restMins = mainActivityBundle.getInt("restMins");
 
         // create the two timers a.k.a work and rest
@@ -326,7 +359,7 @@ public class TimerActivity extends Activity {
             }
         };
 
-        // assign the proper values to the 'starting' parameters, so we always know from where have started
+        // assign the proper values to the 'starting' parameters, so we always know from where we have started
         this.startingSets = this.sets;
         this.startingWorkSecs = this.workSecs;
         this.startingWorkMins = this.workMins;
@@ -339,9 +372,8 @@ public class TimerActivity extends Activity {
         this.mpToPause = MediaPlayer.create(this.getApplicationContext(), R.raw.pause);
         this.mpToResume = MediaPlayer.create(this.getApplicationContext(), R.raw.resume);
         this.mpToEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.end);
-        this.mpToFullyEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.fullyend);
 
-        // set an event to the 'end' button, because it has to be a long one, not a normal one
+        // set an event to the 'end' button, because it has to be a long, not a normal one
         this.endBtn.setOnLongClickListener(v -> {
             endTimer(new View(this.getApplicationContext()));
             return false;
@@ -416,10 +448,10 @@ public class TimerActivity extends Activity {
 
     public void pauseTimer(View view) {
 
-        // play the proper sound so we know that we have pause the timer a.k.a feedback
+        // play the proper sound so we know that we have pause the timer
         this.mpToPause.start();
 
-        // stop the the timer that is currently working and assign 'true' to its corresponding 'beenPaused' boolean
+        // stop the timer that is currently working and assign 'true' to its corresponding 'beenPaused' boolean
         if (this.isWorkOn) {
             this.workCountDownTimer.cancel();
             this.hasWorkBeenPaused = true;
@@ -435,7 +467,7 @@ public class TimerActivity extends Activity {
         this.endBtn.setVisibility(View.VISIBLE);
         this.trainingPausedText.setVisibility(View.VISIBLE);
 
-        // set the background color of the activity to yellow, so we know that the current timer has been paused
+        // set the background color of the activity to yellow, so we know that the 'pause' phase is on
         this.thisActivity.setBackgroundColor(Color.YELLOW);
 
         // invoke the 'updatePausedFields' method to assign the proper values to our parameters
@@ -457,11 +489,9 @@ public class TimerActivity extends Activity {
     @Override
     public void onBackPressed() {
 
-        // cancel the timer depending on who is currently working
-        if(this.isWorkOn){
+        if (this.isWorkOn) {
             this.workCountDownTimer.cancel();
-        }
-        else {
+        } else {
             this.restCountDownTimer.cancel();
         }
 
@@ -470,8 +500,6 @@ public class TimerActivity extends Activity {
 
         // finally finish the activity and head back to MainActivity
         this.finish();
-
-//
 //        Intent intent = new Intent(this, TimerActivity.class);
 //        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
