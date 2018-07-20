@@ -4,12 +4,16 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -315,13 +319,23 @@ public class TimerActivity extends Activity {
         // this.trainingRestQuantity.setVisibility(View.GONE);
         this.trainingPausedText.setVisibility(View.GONE);
 
-        // get the 'Bundle' that was passed to us from the MainActivity class a.k.a get the values of the parameters so we know how long should the timers be
-        Bundle mainActivityBundle = getIntent().getExtras();
-        this.sets = mainActivityBundle.getInt("sets");
-        this.workSecs = mainActivityBundle.getInt("workSecs") + 1;
-        this.workMins = mainActivityBundle.getInt("workMins");
-        this.restSecs = mainActivityBundle.getInt("restSecs") + 1;
-        this.restMins = mainActivityBundle.getInt("restMins");
+        // get the 'Bundle' that was passed to us from the MainActivity class a.k.a get the values of the parameters so we know how long the timers should be
+        if(!getIntent().getExtras().isEmpty()){
+            Bundle mainActivityBundle = getIntent().getExtras();
+
+            this.sets = mainActivityBundle.getInt("sets");
+            this.workSecs = mainActivityBundle.getInt("workSecs") + 1;
+            this.workMins = mainActivityBundle.getInt("workMins");
+            this.restSecs = mainActivityBundle.getInt("restSecs") + 1;
+            this.restMins = mainActivityBundle.getInt("restMins");
+        }
+        else {
+            this.sets = savedInstanceState.getInt("sets");
+            this.workSecs = savedInstanceState.getInt("workSecs") + 1;
+            this.workMins = savedInstanceState.getInt("workMins");
+            this.restSecs = savedInstanceState.getInt("restSecs") + 1;
+            this.restMins = savedInstanceState.getInt("restMins");
+        }
 
         // create the two timers a.k.a work and rest
         this.workCountDownTimer = new CountDownTimer((((this.workMins * 60) + this.workSecs) * 1000), 1000) {
@@ -392,6 +406,11 @@ public class TimerActivity extends Activity {
 
         this.updateData();
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
     // Methods to continue, pause or end the timers
@@ -500,20 +519,21 @@ public class TimerActivity extends Activity {
 
         // finally finish the activity and head back to MainActivity
         this.finish();
-//        Intent intent = new Intent(this, TimerActivity.class);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-//        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
-//                .setSmallIcon(R.drawable.ic_stat_paused_app)
-//                .setContentTitle("Sample title")
-//                .setContentText("Sample text")
-//                .setAutoCancel(true)
-//                .setPriority(NotificationManager.IMPORTANCE_HIGH)
-//                .setContentIntent(pendingIntent);  // Open this activity when the notification is pressed
+        Intent intent = new Intent(this, TimerActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-//        notificationManager.notify("oneAndOnly", 1, mBuilder.build());
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
+                .setSmallIcon(R.drawable.ic_stat_paused_app)
+                .setContentTitle("Sample title")
+                .setContentText("Sample text")
+                .setAutoCancel(true)
+                .setPriority(NotificationManager.IMPORTANCE_HIGH)
+                .setContentIntent(pendingIntent);  // Open this activity when the notification is pressed
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify("oneAndOnly", 1, mBuilder.build());
 
 
     }
