@@ -308,21 +308,12 @@ public class MainActivity extends Activity {
             initializeDefaultParameters();
         }
 
-    }
-
-    @Override
-    protected void onStart() {
-
-        super.onStart();
-
-        this.setParameters();
-
-        //get the information on the screen via the custom methods
         this.updateData();
     }
 
-    /* Method that gets invoked once we stop using the 'TimerActivity';
-    Once it gets a good result(RESULT_OK), we update the values of the
+
+    /* Method that gets invoked once we receive a result from 'TimerActivity.java';
+    If we get a good result(a.k.a RESULT_OK), we update the values of the
     parameters and then update the data on the screen
     */
     @Override
@@ -429,8 +420,10 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    // Method just to request permission for writing inside the external storage (it also receives reading permission)
-    // After we receive a result from this method, we go to 'onRequestPermissionsResult'
+    /* Method used to request permission for writing inside the external storage
+    (at the same time it also receives reading permission). After we receive a result
+    from this method, we go to 'onRequestPermissionsResult'
+    */
     public void requestWriteStoragePermission() {
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
     }
