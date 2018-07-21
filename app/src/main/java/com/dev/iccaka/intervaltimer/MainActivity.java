@@ -35,6 +35,8 @@ public class MainActivity extends Activity {
     private int restMins;
     //========================================================
 
+    private BaseDataWriter<Integer> dataWriter;
+
     // Views from activity_main.xml
     private TextView setsTextView;
     private TextView workTextView;
@@ -60,7 +62,6 @@ public class MainActivity extends Activity {
 
     // Methods to read or write the parameters to the corresponding file
     private void setParameters() {
-
         // get the parameters from the external storage
         if (this.isExternalStorageReadable()) {
 
@@ -84,7 +85,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private List<Integer> getParameters() {
+    private List<Integer> getParameters() {  // Returns a list containing the current values of the parameters
         ArrayList<Integer> parameters = new ArrayList<>();
 
         parameters.add(this.sets);
@@ -94,10 +95,9 @@ public class MainActivity extends Activity {
         parameters.add(this.restMins);
 
         return Collections.unmodifiableList(parameters);
-    }  // Returns a list containing the current values of the parameters
+    }
 
-    // Reads the parameters from the 'parameters' file inside the external storage
-    private List<Integer> readParameters() throws IOException {
+    private List<Integer> readParameters() throws IOException {  // Reads the parameters from the 'parameters' file inside the external storage
 
         List<Integer> parameters = new ArrayList<>();
 
@@ -137,8 +137,7 @@ public class MainActivity extends Activity {
         return Collections.unmodifiableList(parameters);
     }
 
-    // Writes the current parameters from the 'getparameters' method to the parameters file
-    private void writeParameters() {
+    private void writeParameters() {  // Writes the current parameters from the 'getparameters' method to the parameters file
         // get the current values of the parameters and put them into an 'Integer' list
         List<Integer> parameters = this.getParameters();
 
@@ -229,7 +228,6 @@ public class MainActivity extends Activity {
         this.updateRest();
     }
 
-
     @SuppressLint("SetTextI18n")
     private void updateSets() {
         if (this.sets > 9) {
@@ -244,9 +242,9 @@ public class MainActivity extends Activity {
     private void updateWork() {
         if (this.workMins > 9 && this.workSecs > 9) {
             this.workTextView.setText("" + this.workMins + " : " + this.workSecs);
-        } else if (this.workMins > 9 && this.workSecs <= 9) {
+        } else if (this.workMins > 9) {
             this.workTextView.setText("" + this.workMins + " : 0" + this.workSecs);
-        } else if (this.workMins <= 9 && this.workSecs > 9) {
+        } else if (this.workSecs > 9) {
             this.workTextView.setText("0" + this.workMins + " : " + this.workSecs);
         } else {
             this.workTextView.setText("0" + this.workMins + " : 0" + this.workSecs);
@@ -257,9 +255,9 @@ public class MainActivity extends Activity {
     private void updateRest() {
         if (this.restMins > 9 && this.restSecs > 9) {
             this.restTextView.setText("" + this.restMins + " : " + this.restSecs);
-        } else if (this.restMins > 9 && this.restSecs <= 9) {
+        } else if (this.restMins > 9) {
             this.restTextView.setText("" + this.restMins + " : 0" + this.restSecs);
-        } else if (this.restMins <= 9 && this.restSecs > 9) {
+        } else if (this.restSecs > 9) {
             this.restTextView.setText("0" + this.restMins + " : " + this.restSecs);
         } else {
             this.restTextView.setText("0" + this.restMins + " : 0" + this.restSecs);
@@ -296,6 +294,7 @@ public class MainActivity extends Activity {
         this.restMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restMinusBtn.performClick()));
         //========================================================
 
+        this.dataWriter = new MainActivityDataWriter();
 
         if (!this.isExternalStorageAccessPermissionGranted()) {
             this.requestWriteStoragePermission();
@@ -310,7 +309,6 @@ public class MainActivity extends Activity {
 
         this.updateData();
     }
-
 
     /* Method that gets invoked once we receive a result from 'TimerActivity.java';
     If we get a good result(a.k.a RESULT_OK), we update the values of the
@@ -457,7 +455,8 @@ public class MainActivity extends Activity {
             case 1:
                 // if the write permission was granted
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    this.onStart();
+                    this.setParameters();
+                    this.updateData();
                 } else { // if the permission wasn't granted a.k.a we can't write
                     Toast.makeText(MainActivity.this, "The app won't be able to save your values", Toast.LENGTH_SHORT).show();
                 }

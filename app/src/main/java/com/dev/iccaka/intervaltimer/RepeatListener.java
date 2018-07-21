@@ -14,13 +14,7 @@ public class RepeatListener implements OnTouchListener {
     private int initialInterval;
     private final int normalInterval;
     private final OnClickListener clickListener;
-    private Runnable handlerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            handler.postDelayed(this, normalInterval);
-            clickListener.onClick(downView);
-        }
-    };
+    private Runnable handlerRunnable;
 
     public RepeatListener(int initialInterval, int normalInterval, View.OnClickListener clickListener) {
         if (clickListener == null) {
@@ -34,6 +28,11 @@ public class RepeatListener implements OnTouchListener {
         this.initialInterval = initialInterval;
         this.normalInterval = normalInterval;
         this.clickListener = clickListener;
+
+        this.handlerRunnable = () -> {
+            this.handler.postDelayed(this.handlerRunnable, this.normalInterval);
+            this.clickListener.onClick(this.downView);
+        };
     }
 
     @Override
