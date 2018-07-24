@@ -7,6 +7,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -309,8 +310,8 @@ public class TimerActivity extends Activity {
         this.thisActivity = findViewById(R.id.timerActivity);
         this.trainingSetsQuantity = findViewById(R.id.trainingSetsQuantity);
         this.trainingWorkQuantity = findViewById(R.id.trainingWorkQuantity);
-        this.trainingMotivationalText = findViewById(R.id.trainingMotivationalText);
         this.trainingRestQuantity = findViewById(R.id.trainingRestQuantity);
+        this.trainingMotivationalText = findViewById(R.id.trainingMotivationalText);
         this.trainingPausedText = findViewById(R.id.trainingPausedText);
 
         // set a bunch of different visibilities to the view so we don't see redundant views
@@ -320,7 +321,7 @@ public class TimerActivity extends Activity {
         this.trainingPausedText.setVisibility(View.GONE);
 
         // get the 'Bundle' that was passed to us from the MainActivity class a.k.a get the values of the parameters so we know how long the timers should be
-        if(!getIntent().getExtras().isEmpty()){
+        if (!getIntent().getExtras().isEmpty()) {
             Bundle mainActivityBundle = getIntent().getExtras();
 
             this.sets = mainActivityBundle.getInt("sets");
@@ -328,8 +329,7 @@ public class TimerActivity extends Activity {
             this.workMins = mainActivityBundle.getInt("workMins");
             this.restSecs = mainActivityBundle.getInt("restSecs") + 1;
             this.restMins = mainActivityBundle.getInt("restMins");
-        }
-        else {
+        } else {
             this.sets = savedInstanceState.getInt("sets");
             this.workSecs = savedInstanceState.getInt("workSecs") + 1;
             this.workMins = savedInstanceState.getInt("workMins");
@@ -395,6 +395,16 @@ public class TimerActivity extends Activity {
 
         // create the notification channel, so we can have a notification
         this.createNotificationChannel();
+
+        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/monkey.ttf");
+        this.continueBtn.setTypeface(tf);
+        this.pauseBtn.setTypeface(tf);
+        this.endBtn.setTypeface(tf);
+        this.trainingSetsQuantity.setTypeface(tf);
+        this.trainingWorkQuantity.setTypeface(tf);
+        this.trainingRestQuantity.setTypeface(tf);
+        this.trainingMotivationalText.setTypeface(tf);
+        this.trainingPausedText.setTypeface(tf);
 
         // finally start the work timer
         this.startWorkTimer();

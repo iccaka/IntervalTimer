@@ -9,20 +9,18 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class MainActivityDataWriter<T extends Integer> implements DataWriter {
+public class MainActivityDataWriter implements DataWriter {
 
-    private List<T> dataList;
+    private List<Integer> dataList;
 
     public MainActivityDataWriter(){
-        this.dataList = new ArrayList<>();
+        this(new Integer[]{});
     }
 
     public MainActivityDataWriter(Integer... data) {
         this.dataList = new ArrayList<>();
-        this.dataList.addAll(data);
+        this.dataList.addAll(Arrays.asList(data));
     }
-
-    public addData()
 
     @Override
     public void writeData() throws IOException {

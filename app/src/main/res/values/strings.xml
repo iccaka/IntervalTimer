@@ -13,7 +13,7 @@
     <string name="starting_sets_timer">12</string>
     <string name="starting_work">01 : 30</string>
     <string name="starting_rest">00 : 30</string>
-    <string name="text_sets">Sets</string>
+    <string name="text_sets">Sets </string>
     <string name="text_work">Work Interval</string>
     <string name="text_rest">Rest Interval</string>
     <string name="text_motivational_timer">Work It</string>

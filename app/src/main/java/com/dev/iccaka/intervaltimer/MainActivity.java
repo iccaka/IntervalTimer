@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -35,7 +36,7 @@ public class MainActivity extends Activity {
     private int restMins;
     //========================================================
 
-    private BaseDataWriter<Integer> dataWriter;
+    private DataWriter dataWriter;
 
     // Views from activity_main.xml
     private TextView setsTextView;
@@ -191,7 +192,7 @@ public class MainActivity extends Activity {
         this.restMins = DEFAULT_REST_MINS;
     }
 
-    // Checks if the externa l storage is available for read and write
+    // Checks if the external storage is available for read and write
     private boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
 
@@ -231,7 +232,7 @@ public class MainActivity extends Activity {
     @SuppressLint("SetTextI18n")
     private void updateSets() {
         if (this.sets > 9) {
-            this.setsTextView.setText("  " + this.sets + "   ");
+            this.setsTextView.setText(" " + this.sets + "  ");
             return;
         }
 
@@ -294,7 +295,6 @@ public class MainActivity extends Activity {
         this.restMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restMinusBtn.performClick()));
         //========================================================
 
-        this.dataWriter = new MainActivityDataWriter();
 
         if (!this.isExternalStorageAccessPermissionGranted()) {
             this.requestWriteStoragePermission();
@@ -306,6 +306,24 @@ public class MainActivity extends Activity {
         } else {
             initializeDefaultParameters();
         }
+
+        TextView stv = findViewById(R.id.setsText);
+        TextView wtv = findViewById(R.id.workText);
+        TextView rtv = findViewById(R.id.restText);
+        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/monkey.ttf");
+        stv.setTypeface(tf);
+        wtv.setTypeface(tf);
+        rtv.setTypeface(tf);
+
+        this.setsMinusBtn.setTypeface(tf);
+        this.setsPlusBtn.setTypeface(tf);
+        this.workMinusBtn.setTypeface(tf);
+        this.workPlusBtn.setTypeface(tf);
+        this.restMinusBtn.setTypeface(tf);
+        this.restPlusBtn.setTypeface(tf);
+        this.setsTextView.setTypeface(tf);
+        this.workTextView.setTypeface(tf);
+        this.restTextView.setTypeface(tf);
 
         this.updateData();
     }
@@ -469,8 +487,7 @@ public class MainActivity extends Activity {
         // if the 'isBackPressedTwice' boolean is 'true', invoke the super method which only exits the activity
         if (this.isBackPressedTwice) {
             super.onBackPressed();
-        }
-        else {
+        } else {
             //... if it isn't pressed, make the boolean 'true' and show a 'Toast' with a message
             this.isBackPressedTwice = true;
             Toast.makeText(MainActivity.this, "Press BACK once again to exit", Toast.LENGTH_SHORT).show();
