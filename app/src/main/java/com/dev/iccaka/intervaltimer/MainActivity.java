@@ -328,20 +328,20 @@ public class MainActivity extends Activity {
         this.updateData();
     }
 
-    /* Method that gets invoked once we receive a result from 'TimerActivity.java';
-    If we get a good result(a.k.a RESULT_OK), we update the values of the
-    parameters and then update the data on the screen
-    */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // if the request code is the same as the one from the 'timerStart' method and if the result code is RESULT_OK, ...
-        if (requestCode == MainActivity.START_TIMER && resultCode == RESULT_OK) {
-            if (this.isExternalStorageAccessPermissionGranted()) {
-                // ...set the parameters by reading their values from the 'parameters' file
-                this.setParameters();
-                this.updateData();
-            }
-        }
+    protected void onResume() {
+        super.onResume();
+
+        this.setParameters();
+        this.updateData();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        this.setParameters();
+        this.updateData();
     }
 
     // Methods to properly increment the parameters when you click on their corresponding buttons
@@ -449,7 +449,7 @@ public class MainActivity extends Activity {
 
         this.writeParameters();
 
-        // create an 'Intent' so we can start new activity
+        // create an 'Intent' so we can start the new activity
         Intent intent = new Intent(this, TimerActivity.class);
 
         // put the parameters' values inside the 'Intent'
@@ -459,8 +459,8 @@ public class MainActivity extends Activity {
         intent.putExtra("restSecs", this.restSecs);
         intent.putExtra("restMins", this.restMins);
 
-        // finally start the activity and wait for a result; Once we receive a result, 'onActivityResult' gets invoked.
-        startActivityForResult(intent, MainActivity.START_TIMER);
+        // finally start the activity
+        startActivity(intent);
 
     }
 

@@ -524,9 +524,6 @@ public class TimerActivity extends Activity {
             this.restCountDownTimer.cancel();
         }
 
-        // set the result for MainActivity to 'RESULT_OK', meaning everything went fine
-        setResult(RESULT_OK);
-
         // finally finish the activity and head back to MainActivity
         this.finish();
 
@@ -544,7 +541,6 @@ public class TimerActivity extends Activity {
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify("oneAndOnly", 1, mBuilder.build());
-
 
     }
 
