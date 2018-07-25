@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.view.View;
@@ -284,7 +285,6 @@ public class MainActivity extends Activity {
         this.setsTextView = findViewById(R.id.setsQuantity);
         this.workTextView = findViewById(R.id.workQuantity);
         this.restTextView = findViewById(R.id.restQuantity);
-        //========================================================
 
         //attach listeners to all buttons
         this.setsPlusBtn.setOnTouchListener(new RepeatListener(600, 50, v -> setsPlusBtn.performClick()));
@@ -293,20 +293,6 @@ public class MainActivity extends Activity {
         this.workMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> workMinusBtn.performClick()));
         this.restPlusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restPlusBtn.performClick()));
         this.restMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restMinusBtn.performClick()));
-        //========================================================
-
-
-        if (!this.isExternalStorageAccessPermissionGranted()) {
-            this.requestWriteStoragePermission();
-        }
-
-        if (this.isExternalStorageAccessPermissionGranted()) {
-            //set the parameters by reading their values from the 'parameters' file
-            this.setParameters();
-        } else {
-            initializeDefaultParameters();
-        }
-
 
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O){
             Typeface tf = ResourcesCompat.getFont(getApplicationContext(), R.font.monkey);
@@ -330,12 +316,28 @@ public class MainActivity extends Activity {
             this.restTextView.setTypeface(tf);
         }
 
+        if (!this.isExternalStorageAccessPermissionGranted()) {
+            this.requestWriteStoragePermission();
+        }
+
+        if (this.isExternalStorageAccessPermissionGranted()) {
+            //set the parameters by reading their values from the 'parameters' file
+            this.setParameters();
+        } else {
+            initializeDefaultParameters();
+        }
+
         this.updateData();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+        if (getActionBar() != null) {
+            getActionBar().hide();
+        }
 
         this.setParameters();
         this.updateData();
@@ -473,7 +475,7 @@ public class MainActivity extends Activity {
        1 is when we enable both write and read a.k.a when we start the timer)
     */
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case 1:
                 // if the write permission was granted
@@ -498,7 +500,7 @@ public class MainActivity extends Activity {
             Toast.makeText(MainActivity.this, "Press BACK once again to exit", Toast.LENGTH_SHORT).show();
 
             // start a 'Handler' and if we don't press 'BACK' again in 2 seconds, the boolean gets back to 'false' and the whole thing starts again after we press 'BACK'
-            new Handler().postDelayed(() -> isBackPressedTwice = false, 2000);
+            new Handler().postDelayed(() -> this.isBackPressedTwice = false, 2000);
         }
     }
 }
