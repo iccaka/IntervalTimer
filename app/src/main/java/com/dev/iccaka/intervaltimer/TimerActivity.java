@@ -15,6 +15,7 @@ import android.os.CountDownTimer;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -293,6 +294,23 @@ public class TimerActivity extends Activity {
         this.pausedRestMins = this.restMins;
     }
 
+
+    private void createNotification() {
+//        Intent intent = new Intent(this, TimerActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+//
+//        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
+//                .setSmallIcon(R.drawable.ic_stat_paused_app)
+//                .setContentTitle("Sample title")
+//                .setContentText("Sample text")
+//                .setAutoCancel(true)
+//                .setContentIntent(pendingIntent);  // Open this activity when the notification is pressed
+//
+//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+//        notificationManager.notify("oneAndOnly", 1, mBuilder.build());
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
         super.onCreate(savedInstanceState);
@@ -396,15 +414,17 @@ public class TimerActivity extends Activity {
         // create the notification channel, so we can have a notification
         this.createNotificationChannel();
 
-        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/monkey.ttf");
-        this.continueBtn.setTypeface(tf);
-        this.pauseBtn.setTypeface(tf);
-        this.endBtn.setTypeface(tf);
-        this.trainingSetsQuantity.setTypeface(tf);
-        this.trainingWorkQuantity.setTypeface(tf);
-        this.trainingRestQuantity.setTypeface(tf);
-        this.trainingMotivationalText.setTypeface(tf);
-        this.trainingPausedText.setTypeface(tf);
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O){
+            Typeface tf = ResourcesCompat.getFont(getApplicationContext(), R.font.monkey);
+            this.continueBtn.setTypeface(tf);
+            this.pauseBtn.setTypeface(tf);
+            this.endBtn.setTypeface(tf);
+            this.trainingSetsQuantity.setTypeface(tf);
+            this.trainingWorkQuantity.setTypeface(tf);
+            this.trainingRestQuantity.setTypeface(tf);
+            this.trainingMotivationalText.setTypeface(tf);
+            this.trainingPausedText.setTypeface(tf);
+        }
 
         // finally start the work timer
         this.startWorkTimer();
@@ -416,6 +436,13 @@ public class TimerActivity extends Activity {
 
         this.updateData();
 
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        this.createNotification();
     }
 
     @Override
@@ -527,20 +554,7 @@ public class TimerActivity extends Activity {
         // finally finish the activity and head back to MainActivity
         this.finish();
 
-        Intent intent = new Intent(this, TimerActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
-                .setSmallIcon(R.drawable.ic_stat_paused_app)
-                .setContentTitle("Sample title")
-                .setContentText("Sample text")
-                .setAutoCancel(true)
-                .setPriority(NotificationManager.IMPORTANCE_HIGH)
-                .setContentIntent(pendingIntent);  // Open this activity when the notification is pressed
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify("oneAndOnly", 1, mBuilder.build());
+        this.createNotification();
 
     }
 

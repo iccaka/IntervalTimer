@@ -30,10 +30,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:fontFamily="@font/monkey"
                     android:gravity="center_horizontal"
                     android:text="@string/text_sets"
                     android:textColor="#000"
-                    android:textSize="26sp" />
+                    android:textSize="32sp" />
 
                 <LinearLayout
                     android:id="@+id/setsLinear"
@@ -52,14 +53,17 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="#ffffff"
+                        android:fontFamily="@font/monkey"
                         android:onClick="decrementSets"
-                        android:text="@string/sign_minus" />
+                        android:text="@string/sign_minus"
+                        android:textSize="24sp" />
 
                     <TextView
                         android:id="@+id/setsQuantity"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
+                        android:fontFamily="@font/monkey"
                         android:freezesText="true"
                         android:gravity="center_horizontal"
                         android:text="@string/starting_sets_main"
@@ -72,8 +76,10 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="#ffffff"
+                        android:fontFamily="@font/monkey"
                         android:onClick="incrementSets"
-                        android:text="@string/sign_plus" />
+                        android:text="@string/sign_plus"
+                        android:textSize="24sp" />
 
                 </LinearLayout>
 
@@ -98,10 +104,11 @@
                     android:layout_height="match_parent"
                     android:layout_marginTop="8dp"
                     android:layout_weight="1"
+                    android:fontFamily="@font/monkey"
                     android:gravity="center_horizontal"
                     android:text="@string/text_work"
                     android:textColor="#000"
-                    android:textSize="26sp"
+                    android:textSize="32sp"
                     app:layout_constraintTop_toBottomOf="@+id/setsLinear" />
 
                 <LinearLayout
@@ -121,14 +128,17 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="#ffffff"
+                        android:fontFamily="@font/monkey"
                         android:onClick="decrementWork"
-                        android:text="@string/sign_minus" />
+                        android:text="@string/sign_minus"
+                        android:textSize="24sp" />
 
                     <TextView
                         android:id="@+id/workQuantity"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
+                        android:fontFamily="@font/monkey"
                         android:freezesText="true"
                         android:gravity="center_horizontal"
                         android:text="@string/starting_work"
@@ -141,8 +151,10 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="#ffffff"
+                        android:fontFamily="@font/monkey"
                         android:onClick="incrementWork"
-                        android:text="@string/sign_plus" />
+                        android:text="@string/sign_plus"
+                        android:textSize="24sp" />
 
                 </LinearLayout>
 
@@ -167,10 +179,11 @@
                     android:layout_height="match_parent"
                     android:layout_marginTop="8dp"
                     android:layout_weight="1"
+                    android:fontFamily="@font/monkey"
                     android:gravity="center_horizontal"
                     android:text="@string/text_rest"
                     android:textColor="#000"
-                    android:textSize="26sp"
+                    android:textSize="32sp"
                     app:layout_constraintTop_toBottomOf="@+id/workLinear" />
 
                 <LinearLayout
@@ -190,14 +203,18 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="#ffffff"
+                        android:fontFamily="@font/monkey"
                         android:onClick="decrementRest"
-                        android:text="@string/sign_minus" />
+                        android:text="@string/sign_minus"
+                        android:textSize="24sp" />
 
                     <TextView
+
                         android:id="@+id/restQuantity"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
+                        android:fontFamily="@font/monkey"
                         android:freezesText="true"
                         android:gravity="center_horizontal"
                         android:text="@string/starting_rest"
@@ -210,8 +227,10 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="#ffffff"
+                        android:fontFamily="@font/monkey"
                         android:onClick="incrementRest"
-                        android:text="@string/sign_plus" />
+                        android:text="@string/sign_plus"
+                        android:textSize="24sp" />
 
                 </LinearLayout>
 
@@ -225,15 +244,19 @@
             </View>
 
             <Button
-                android:layout_width="wrap_content"
+                android:id="@+id/startBtn"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="16dp"
                 android:layout_marginTop="16dp"
                 android:background="#ffffff"
+                android:fontFamily="@font/monkey"
                 android:onClick="timerStart"
                 android:text="@string/btn_start"
                 android:textAlignment="center"
+                android:textAllCaps="true"
+                android:textSize="24sp"
                 android:textStyle="bold"
                 android:visibility="visible" />
 

@@ -6,10 +6,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -58,8 +60,6 @@ public class MainActivity extends Activity {
     public static final int DEFAULT_REST_SECS = 30;
     public static final int DEFAULT_REST_MINS = 0;
     public static final String DEFAULT_FILE_NAME = "parameters";
-    // a static field used to start the timer activity and then wait for a result
-    public static final int START_TIMER = 1;
 
     // Methods to read or write the parameters to the corresponding file
     private void setParameters() {
@@ -307,23 +307,28 @@ public class MainActivity extends Activity {
             initializeDefaultParameters();
         }
 
-        TextView stv = findViewById(R.id.setsText);
-        TextView wtv = findViewById(R.id.workText);
-        TextView rtv = findViewById(R.id.restText);
-        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/monkey.ttf");
-        stv.setTypeface(tf);
-        wtv.setTypeface(tf);
-        rtv.setTypeface(tf);
 
-        this.setsMinusBtn.setTypeface(tf);
-        this.setsPlusBtn.setTypeface(tf);
-        this.workMinusBtn.setTypeface(tf);
-        this.workPlusBtn.setTypeface(tf);
-        this.restMinusBtn.setTypeface(tf);
-        this.restPlusBtn.setTypeface(tf);
-        this.setsTextView.setTypeface(tf);
-        this.workTextView.setTypeface(tf);
-        this.restTextView.setTypeface(tf);
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O){
+            Typeface tf = ResourcesCompat.getFont(getApplicationContext(), R.font.monkey);
+            TextView stv = findViewById(R.id.setsText);
+            TextView wtv = findViewById(R.id.workText);
+            TextView rtv = findViewById(R.id.restText);
+            Button startBtn = findViewById(R.id.startBtn);
+
+            stv.setTypeface(tf);
+            wtv.setTypeface(tf);
+            rtv.setTypeface(tf);
+            startBtn.setTypeface(tf);
+            this.setsMinusBtn.setTypeface(tf);
+            this.setsPlusBtn.setTypeface(tf);
+            this.workMinusBtn.setTypeface(tf);
+            this.workPlusBtn.setTypeface(tf);
+            this.restMinusBtn.setTypeface(tf);
+            this.restPlusBtn.setTypeface(tf);
+            this.setsTextView.setTypeface(tf);
+            this.workTextView.setTypeface(tf);
+            this.restTextView.setTypeface(tf);
+        }
 
         this.updateData();
     }

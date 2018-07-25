@@ -24,6 +24,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="36dp"
                 android:layout_weight="1"
+                android:fontFamily="@font/monkey"
                 android:gravity="center_horizontal"
                 android:text="@string/starting_sets_timer"
                 android:textColor="#000"
@@ -34,6 +35,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/monkey"
                 android:gravity="center_horizontal"
                 android:text="@string/starting_work"
                 android:textColor="#000"
@@ -44,6 +46,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/monkey"
                 android:gravity="center_horizontal"
                 android:text="@string/starting_rest"
                 android:textColor="#000"
@@ -54,6 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/monkey"
                 android:gravity="center_horizontal"
                 android:text="@string/text_motivational_timer"
                 android:textAllCaps="true"
@@ -65,6 +69,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/monkey"
                 android:gravity="center_horizontal"
                 android:text="@string/text_paused_timer"
                 android:textAllCaps="true"
@@ -76,26 +81,32 @@
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_weight="1"
+                android:fontFamily="@font/monkey"
                 android:onClick="pauseTimer"
                 android:text="@string/btn_pause"
-                android:textAllCaps="true" />
+                android:textAllCaps="true"
+                android:textSize="24sp" />
 
             <Button
                 android:id="@+id/continueBtn"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_weight="1"
+                android:fontFamily="@font/monkey"
                 android:onClick="continueTimer"
                 android:text="@string/btn_continue"
-                android:textAllCaps="true" />
+                android:textAllCaps="true"
+                android:textSize="24sp" />
 
             <Button
                 android:id="@+id/endBtn"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_weight="1"
+                android:fontFamily="@font/monkey"
                 android:text="@string/btn_end"
-                android:textAllCaps="true" />
+                android:textAllCaps="true"
+                android:textSize="24sp" />
         </LinearLayout>
 
 
