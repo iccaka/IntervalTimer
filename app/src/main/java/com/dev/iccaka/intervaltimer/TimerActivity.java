@@ -6,7 +6,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.media.MediaActionSound;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -262,9 +261,9 @@ public class TimerActivity extends Activity {
     private void updateWork() {
         if (this.workMins > 9 && this.workSecs > 9) {
             this.trainingWorkQuantity.setText("" + this.workMins + " : " + this.workSecs);
-        } else if (this.workMins > 9 && this.workSecs <= 9) {
+        } else if (this.workMins > 9) {
             this.trainingWorkQuantity.setText("" + this.workMins + " : 0" + this.workSecs);
-        } else if (this.workMins <= 9 && this.workSecs > 9) {
+        } else if (this.workSecs > 9) {
             this.trainingWorkQuantity.setText("0" + this.workMins + " : " + this.workSecs);
         } else {
             this.trainingWorkQuantity.setText("0" + this.workMins + " : 0" + this.workSecs);
@@ -275,9 +274,9 @@ public class TimerActivity extends Activity {
     private void updateRest() {
         if (this.restMins > 9 && this.restSecs > 9) {
             this.trainingRestQuantity.setText("" + this.restMins + " : " + this.restSecs);
-        } else if (this.restMins > 9 && this.restSecs <= 9) {
+        } else if (this.restMins > 9) {
             this.trainingRestQuantity.setText("" + this.restMins + " : 0" + this.restSecs);
-        } else if (this.restMins <= 9 && this.restSecs > 9) {
+        } else if (this.restSecs > 9) {
             this.trainingRestQuantity.setText("0" + this.restMins + " : " + this.restSecs);
         } else {
             this.trainingRestQuantity.setText("0" + this.restMins + " : 0" + this.restSecs);
