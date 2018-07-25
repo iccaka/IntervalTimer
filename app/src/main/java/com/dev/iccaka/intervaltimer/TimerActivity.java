@@ -4,21 +4,19 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.media.MediaActionSound;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class TimerActivity extends Activity {
@@ -65,11 +63,12 @@ public class TimerActivity extends Activity {
     //========================================================
 
     // Sounds when we press the buttons
-    private MediaPlayer mpToWork;
-    private MediaPlayer mpToRest;
-    private MediaPlayer mpToPause;
-    private MediaPlayer mpToResume;
     private MediaPlayer mpToEnd;
+    private MediaPlayer mpToFullyEnd;
+    private MediaPlayer mpToPause;
+    private MediaPlayer mpToRest;
+    private MediaPlayer mpToResume;
+    private MediaPlayer mpToWork;
     //========================================================
 
     // Booleans to keep track if the work timer is currently working or not and if any of the timers has ever been paused
@@ -294,7 +293,6 @@ public class TimerActivity extends Activity {
         this.pausedRestMins = this.restMins;
     }
 
-
     private void createNotification() {
 //        Intent intent = new Intent(this, TimerActivity.class);
 //        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -309,6 +307,14 @@ public class TimerActivity extends Activity {
 //
 //        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 //        notificationManager.notify("oneAndOnly", 1, mBuilder.build());
+    }
+
+    private void endTimerAfterCompletion(){
+        this.mpToFullyEnd.start();
+
+        Toast.makeText(this.getApplicationContext(), "Workout done!", Toast.LENGTH_SHORT).show();
+
+        this.onBackPressed();
     }
 
     @Override
@@ -332,28 +338,19 @@ public class TimerActivity extends Activity {
         this.trainingMotivationalText = findViewById(R.id.trainingMotivationalText);
         this.trainingPausedText = findViewById(R.id.trainingPausedText);
 
-        // set a bunch of different visibilities to the view so we don't see redundant views
+        // set a bunch of different visibilities to the views, so we don't see redundant stuff on the screen
         this.endBtn.setVisibility(View.GONE);
         this.continueBtn.setVisibility(View.GONE);
         // this.trainingRestQuantity.setVisibility(View.GONE);
         this.trainingPausedText.setVisibility(View.GONE);
 
         // get the 'Bundle' that was passed to us from the MainActivity class a.k.a get the values of the parameters so we know how long the timers should be
-        if (!getIntent().getExtras().isEmpty()) {
-            Bundle mainActivityBundle = getIntent().getExtras();
-
-            this.sets = mainActivityBundle.getInt("sets");
-            this.workSecs = mainActivityBundle.getInt("workSecs") + 1;
-            this.workMins = mainActivityBundle.getInt("workMins");
-            this.restSecs = mainActivityBundle.getInt("restSecs") + 1;
-            this.restMins = mainActivityBundle.getInt("restMins");
-        } else {
-            this.sets = savedInstanceState.getInt("sets");
-            this.workSecs = savedInstanceState.getInt("workSecs") + 1;
-            this.workMins = savedInstanceState.getInt("workMins");
-            this.restSecs = savedInstanceState.getInt("restSecs") + 1;
-            this.restMins = savedInstanceState.getInt("restMins");
-        }
+        Bundle mainActivityBundle = getIntent().getExtras();
+        this.sets = mainActivityBundle.getInt("sets");
+        this.workSecs = mainActivityBundle.getInt("workSecs") + 1;
+        this.workMins = mainActivityBundle.getInt("workMins");
+        this.restSecs = mainActivityBundle.getInt("restSecs") + 1;
+        this.restMins = mainActivityBundle.getInt("restMins");
 
         // create the two timers a.k.a work and rest
         this.workCountDownTimer = new CountDownTimer((((this.workMins * 60) + this.workSecs) * 1000), 1000) {
@@ -386,12 +383,12 @@ public class TimerActivity extends Activity {
                     // ... or just start the work timer and continue with the work
                     startWorkTimer();
                 } else {
-                    endTimer(endBtn);
+                    endTimerAfterCompletion();
                 }
             }
         };
 
-        // assign the proper values to the 'starting' parameters, so we always know from where we have started
+        // assign the proper values to the 'starting' parameters, so we always know from where we've started
         this.startingSets = this.sets;
         this.startingWorkSecs = this.workSecs;
         this.startingWorkMins = this.workMins;
@@ -404,6 +401,7 @@ public class TimerActivity extends Activity {
         this.mpToPause = MediaPlayer.create(this.getApplicationContext(), R.raw.pause);
         this.mpToResume = MediaPlayer.create(this.getApplicationContext(), R.raw.resume);
         this.mpToEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.end);
+        this.mpToFullyEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.fullyend);
 
         // set an event to the 'end' button, because it has to be a long, not a normal one
         this.endBtn.setOnLongClickListener(v -> {
@@ -414,7 +412,7 @@ public class TimerActivity extends Activity {
         // create the notification channel, so we can have a notification
         this.createNotificationChannel();
 
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             Typeface tf = ResourcesCompat.getFont(getApplicationContext(), R.font.monkey);
             this.continueBtn.setTypeface(tf);
             this.pauseBtn.setTypeface(tf);
@@ -431,23 +429,10 @@ public class TimerActivity extends Activity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        this.updateData();
-
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
 
         this.createNotification();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
     }
 
     // Methods to continue, pause or end the timers
