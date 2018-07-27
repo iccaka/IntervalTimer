@@ -256,26 +256,32 @@ public class MainActivity extends Activity {
             getActionBar().hide();
         }
 
-        if (this.isExternalStorageAccessPermissionGranted()) {
-            this.setParameters();
-        } else {
-            this.initializeDefaultValues();
-        }
-
+        this.setParameters();
         this.updateData();
     }
 
     @Override
-    protected void onRestart() {
-        super.onRestart();
+    protected void onPause() {
+        super.onPause();
 
-        if (this.isExternalStorageAccessPermissionGranted()) {
-            this.setParameters();
-        } else {
-            this.initializeDefaultValues();
+        this.dataWriter.addData(this.getParameters());
+        try {
+            this.dataWriter.writeData();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
 
-        this.updateData();
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        this.dataWriter.addData(this.getParameters());
+        try {
+            this.dataWriter.writeData();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // Methods to properly increment the parameters when you click on their corresponding buttons
@@ -379,16 +385,10 @@ public class MainActivity extends Activity {
     }
 
     // Method to start the timer and pass the parameters to the TimerActivity class
-    public void timerStart(View view) {
+    public void timerStart(View view) throws IOException {
 
-        if (this.isExternalStorageAccessPermissionGranted()) {
-            try {
-                this.dataWriter.addData(this.getParameters());
-                this.dataWriter.writeData();
-            } catch (IOException e) {
-                Toast.makeText(this.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        }
+        this.dataWriter.addData(this.getParameters());
+        this.dataWriter.writeData();
 
         // create an 'Intent' so we can start the new activity
         Intent intent = new Intent(this, TimerActivity.class);
