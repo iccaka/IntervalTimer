@@ -11,13 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivityDataWriter implements IDataWriter {
+public class MainActivityDataWriter implements IDataWriter<Integer> {
 
     private List<Integer> dataList;
 
-    public MainActivityDataWriter(List<Integer> data) {
+    public MainActivityDataWriter() {
         this.dataList = new ArrayList<>();
-        this.dataList.addAll(data);
+    }
+
+    @Override
+    public void addData(List<Integer> dataList) {
+        this.dataList.addAll(dataList);
     }
 
     @Override
@@ -52,11 +56,9 @@ public class MainActivityDataWriter implements IDataWriter {
                 writer.close();
 
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new IOException("Your storage is currently, please try again later.");
             }
         } else {  // if it's not accessible, show a 'Toast'
-//            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable, the app won't be able to save your custom values.", Toast.LENGTH_LONG).show();
-//            return 1;
             throw new IOException("Your external storage is currently unavailable, the app won't be able to save your custom values.");
         }
     }

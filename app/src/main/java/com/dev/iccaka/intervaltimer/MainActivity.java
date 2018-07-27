@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.view.View;
@@ -37,7 +36,7 @@ public class MainActivity extends Activity {
     private int restMins;
     //========================================================
 
-    private IDataWriter dataWriter;
+    private IDataWriter<Integer> dataWriter;
     private IDataReader<Integer> dataReader;
 
     // Views from activity_main.xml
@@ -76,12 +75,12 @@ public class MainActivity extends Activity {
                 this.restSecs = parameters.get(3);
                 this.restMins = parameters.get(4);
             } catch (IOException e) {
-                this.initializeDefaultParameters();
+                this.initializeDefaultValues();
             }
 
         } else {
             Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable.", Toast.LENGTH_LONG).show();
-            this.initializeDefaultParameters();
+            this.initializeDefaultValues();
             Toast.makeText(this.getApplicationContext(), "Initialized the default values.", Toast.LENGTH_LONG).show();
         }
     }
@@ -97,11 +96,10 @@ public class MainActivity extends Activity {
 
         return Collections.unmodifiableList(parameters);
     }
-
     //========================================================
 
     // Gets the current parameters values back to their default ones
-    private void initializeDefaultParameters() {
+    private void initializeDefaultValues() {
         this.sets = DEFAULT_SETS;
         this.workSecs = DEFAULT_WORK_SECS;
         this.workMins = DEFAULT_WORK_MINS;
@@ -234,13 +232,18 @@ public class MainActivity extends Activity {
         }
 
         this.dataReader = new MainActivityDataReader();
-        this.dataWriter = new MainActivityDataWriter(this.getParameters());
+        this.dataWriter = new MainActivityDataWriter();
 
         if (!this.isExternalStorageAccessPermissionGranted()) {
             this.requestWriteStoragePermission();
+
+            if (!this.isExternalStorageAccessPermissionGranted()) {
+                this.initializeDefaultValues();
+            }
+        } else {
+            this.setParameters();
         }
 
-        this.initializeDefaultParameters();
         this.updateData();
     }
 
@@ -253,7 +256,12 @@ public class MainActivity extends Activity {
             getActionBar().hide();
         }
 
-        this.setParameters();
+        if (this.isExternalStorageAccessPermissionGranted()) {
+            this.setParameters();
+        } else {
+            this.initializeDefaultValues();
+        }
+
         this.updateData();
     }
 
@@ -261,7 +269,12 @@ public class MainActivity extends Activity {
     protected void onRestart() {
         super.onRestart();
 
-        this.setParameters();
+        if (this.isExternalStorageAccessPermissionGranted()) {
+            this.setParameters();
+        } else {
+            this.initializeDefaultValues();
+        }
+
         this.updateData();
     }
 
@@ -366,13 +379,19 @@ public class MainActivity extends Activity {
     }
 
     // Method to start the timer and pass the parameters to the TimerActivity class
-    public void timerStart(View view) throws IOException {
+    public void timerStart(View view) {
 
-        this.dataWriter.writeData();
+        if (this.isExternalStorageAccessPermissionGranted()) {
+            try {
+                this.dataWriter.addData(this.getParameters());
+                this.dataWriter.writeData();
+            } catch (IOException e) {
+                Toast.makeText(this.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }
 
         // create an 'Intent' so we can start the new activity
         Intent intent = new Intent(this, TimerActivity.class);
-
         // put the parameters' values inside the 'Intent'
         intent.putExtra("sets", this.sets);
         intent.putExtra("workSecs", this.workSecs);
@@ -382,26 +401,6 @@ public class MainActivity extends Activity {
 
         // finally start the activity
         startActivity(intent);
-
-    }
-
-    /* Method that gets invoked and handles permission results differently ('requestCode'
-       1 is when we enable both write and read a.k.a when we start the timer)
-    */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 1:
-                // if the write permission was granted
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    this.setParameters();
-                    this.updateData();
-                    this.onStart();
-                } else { // if the permission wasn't granted a.k.a we can't write
-                    Toast.makeText(MainActivity.this, "The app won't be able to save your values", Toast.LENGTH_SHORT).show();
-                }
-                break;
-        }
     }
 
     @Override

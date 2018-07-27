@@ -14,7 +14,7 @@ import java.util.List;
 
 public class MainActivityDataReader implements IDataReader<Integer> {
 
-    public MainActivityDataReader(){
+    public MainActivityDataReader() {
 
     }
 
