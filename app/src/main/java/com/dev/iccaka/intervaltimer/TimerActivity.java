@@ -200,7 +200,7 @@ public class TimerActivity extends Activity {
     // Methods to properly decrement the parameters when you click on their corresponding buttons
     private void decrementWork(View view) {
         if (this.workSecs >= 0) {
-            if (this.workSecs <= 4) {
+            if (this.workSecs <= 4 && this.workMins == 0) {
                 this.mpToTick.start();
             }
             this.workSecs--;
@@ -221,7 +221,7 @@ public class TimerActivity extends Activity {
 
     private void decrementRest(View view) {
         if (this.restSecs >= 0) {
-            if (this.restSecs <= 4) {
+            if (this.restSecs <= 4 && this.restMins == 0) {
                 this.mpToTick.start();
             }
             this.restSecs--;

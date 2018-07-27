@@ -175,7 +175,7 @@ public class MainActivity extends Activity {
                 writer.close();
 
             } catch (IOException e) {
-                Toast.makeText(this.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                e.printStackTrace();
             }
         } else {  // if it's not accessible, show a 'Toast'
             Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable, the app won't be able to save your custom values.", Toast.LENGTH_LONG).show();
@@ -320,11 +320,13 @@ public class MainActivity extends Activity {
             this.requestWriteStoragePermission();
         }
 
+        this.initializeDefaultParameters();
+
         if (this.isExternalStorageAccessPermissionGranted()) {
             //set the parameters by reading their values from the 'parameters' file
             this.setParameters();
         } else {
-            initializeDefaultParameters();
+            this.initializeDefaultParameters();
         }
 
         this.updateData();
