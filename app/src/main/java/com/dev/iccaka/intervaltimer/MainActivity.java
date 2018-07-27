@@ -18,11 +18,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dev.iccaka.intervaltimer.Exceptions.DirectoryNotFoundException;
+import com.dev.iccaka.intervaltimer.Interfaces.IDataReader;
+import com.dev.iccaka.intervaltimer.Interfaces.IDataWriter;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +37,8 @@ public class MainActivity extends Activity {
     private int restMins;
     //========================================================
 
-    private DataWriter dataWriter;
+    private IDataWriter dataWriter;
+    private IDataReader<Integer> dataReader;
 
     // Views from activity_main.xml
     private TextView setsTextView;
@@ -68,7 +67,7 @@ public class MainActivity extends Activity {
         if (this.isExternalStorageReadable()) {
 
             try {
-                List<Integer> parameters = this.readParameters();
+                List<Integer> parameters = this.dataReader.readData();
 
                 // set the new values
                 this.sets = parameters.get(0);
@@ -99,89 +98,6 @@ public class MainActivity extends Activity {
         return Collections.unmodifiableList(parameters);
     }
 
-    private List<Integer> readParameters() throws IOException {  // Reads the parameters from the 'parameters' file inside the external storage
-
-        List<Integer> parameters = new ArrayList<>();
-
-        // create a new directory inside the external storage
-        File root = new File(Environment.getExternalStorageDirectory(), "Notes");
-
-        // if it doesn't exist...
-        if (!root.exists()) {
-            throw new DirectoryNotFoundException("The 'Notes' directory wasn't found");
-        }
-
-        // get the 'parameters' file, from where we will read the values of the parameters
-        File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
-        // FileReader reader = new FileReader(gpxfile);
-        FileInputStream fis = new FileInputStream(gpxfile);
-
-        StringBuilder builder = new StringBuilder();
-
-        while (true) {
-            int currChar = fis.read();
-
-            if (currChar == -1) {
-                break;
-            }
-
-            builder.append((char) currChar);
-        }
-
-        String[] values = builder.toString().split(" ");
-
-        for (String value : values) {
-            parameters.add(Integer.parseInt(value));
-        }
-
-        fis.close();
-
-        return Collections.unmodifiableList(parameters);
-    }
-
-    private void writeParameters() {  // Writes the current parameters from the 'getparameters' method to the parameters file
-        // get the current values of the parameters and put them into an 'Integer' list
-        List<Integer> parameters = this.getParameters();
-
-        // create a StringBuilder where we'll put our data about the parameters
-        StringBuilder result = new StringBuilder();
-
-        // create a string using the template('sets' 'workSecs' 'workMin' 'restSecs' 'restMins')
-        for (int a : parameters) {
-            result.append(a).append(" ");
-        }
-
-        /* check if the external storage is accessible, using the custom
-           'isExternalStorageWritable' method, so we can write to the parameters file */
-        if (this.isExternalStorageWritable()) {
-            try {
-                // create a new directory inside the external storage
-                File root = new File(Environment.getExternalStorageDirectory(), "Notes");
-
-                // if it doesn't exist...
-                if (!root.exists()) {
-                    // ...create it and all the corresponding files inside needed to function properly
-                    root.mkdirs();
-                }
-
-                // now create the real 'parameters' file, using the default name, where we will write the values of the parameters
-                File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
-                // create a 'FileWriter' by passing 'gpxfile' to it's constructor
-                FileWriter writer = new FileWriter(gpxfile);
-
-                // append the string('StringBuilder result = new StringBuilder()')
-                writer.append(result.toString());
-                // close the data stream
-                writer.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {  // if it's not accessible, show a 'Toast'
-            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable, the app won't be able to save your custom values.", Toast.LENGTH_LONG).show();
-        }
-
-    }
     //========================================================
 
     // Gets the current parameters values back to their default ones
@@ -191,17 +107,6 @@ public class MainActivity extends Activity {
         this.workMins = DEFAULT_WORK_MINS;
         this.restSecs = DEFAULT_REST_SECS;
         this.restMins = DEFAULT_REST_MINS;
-    }
-
-    // Checks if the external storage is available for read and write
-    private boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-
-        return false;
     }
 
     // Checks if the external storage is available to at least read
@@ -267,14 +172,7 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        this.isBackPressedTwice = false;
-
+    private void getViews() {
         //get the views from the R class
         this.setsMinusBtn = findViewById(R.id.setsMinusBtn);
         this.setsPlusBtn = findViewById(R.id.setsPlusBtn);
@@ -285,7 +183,10 @@ public class MainActivity extends Activity {
         this.setsTextView = findViewById(R.id.setsQuantity);
         this.workTextView = findViewById(R.id.workQuantity);
         this.restTextView = findViewById(R.id.restQuantity);
+    }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private void attachListenersToButtons() {
         //attach listeners to all buttons
         this.setsPlusBtn.setOnTouchListener(new RepeatListener(600, 50, v -> setsPlusBtn.performClick()));
         this.setsMinusBtn.setOnTouchListener(new RepeatListener(600, 50, v -> setsMinusBtn.performClick()));
@@ -293,42 +194,53 @@ public class MainActivity extends Activity {
         this.workMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> workMinusBtn.performClick()));
         this.restPlusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restPlusBtn.performClick()));
         this.restMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restMinusBtn.performClick()));
+    }
 
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O){
-            Typeface tf = ResourcesCompat.getFont(getApplicationContext(), R.font.monkey);
-            TextView stv = findViewById(R.id.setsText);
-            TextView wtv = findViewById(R.id.workText);
-            TextView rtv = findViewById(R.id.restText);
-            Button startBtn = findViewById(R.id.startBtn);
+    private void setTypeFacesToViews() {
+        Typeface tf = ResourcesCompat.getFont(getApplicationContext(), R.font.monkey);
+        TextView stv = findViewById(R.id.setsText);
+        TextView wtv = findViewById(R.id.workText);
+        TextView rtv = findViewById(R.id.restText);
+        Button startBtn = findViewById(R.id.startBtn);
 
-            stv.setTypeface(tf);
-            wtv.setTypeface(tf);
-            rtv.setTypeface(tf);
-            startBtn.setTypeface(tf);
-            this.setsMinusBtn.setTypeface(tf);
-            this.setsPlusBtn.setTypeface(tf);
-            this.workMinusBtn.setTypeface(tf);
-            this.workPlusBtn.setTypeface(tf);
-            this.restMinusBtn.setTypeface(tf);
-            this.restPlusBtn.setTypeface(tf);
-            this.setsTextView.setTypeface(tf);
-            this.workTextView.setTypeface(tf);
-            this.restTextView.setTypeface(tf);
+        stv.setTypeface(tf);
+        wtv.setTypeface(tf);
+        rtv.setTypeface(tf);
+        startBtn.setTypeface(tf);
+        this.setsMinusBtn.setTypeface(tf);
+        this.setsPlusBtn.setTypeface(tf);
+        this.workMinusBtn.setTypeface(tf);
+        this.workPlusBtn.setTypeface(tf);
+        this.restMinusBtn.setTypeface(tf);
+        this.restPlusBtn.setTypeface(tf);
+        this.setsTextView.setTypeface(tf);
+        this.workTextView.setTypeface(tf);
+        this.restTextView.setTypeface(tf);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        this.isBackPressedTwice = false;
+
+        this.getViews();
+        this.attachListenersToButtons();
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            this.setTypeFacesToViews();
         }
+
+        this.dataReader = new MainActivityDataReader();
+        this.dataWriter = new MainActivityDataWriter(this.getParameters());
 
         if (!this.isExternalStorageAccessPermissionGranted()) {
             this.requestWriteStoragePermission();
         }
 
         this.initializeDefaultParameters();
-
-        if (this.isExternalStorageAccessPermissionGranted()) {
-            //set the parameters by reading their values from the 'parameters' file
-            this.setParameters();
-        } else {
-            this.initializeDefaultParameters();
-        }
-
         this.updateData();
     }
 
@@ -454,9 +366,9 @@ public class MainActivity extends Activity {
     }
 
     // Method to start the timer and pass the parameters to the TimerActivity class
-    public void timerStart(View view) {
+    public void timerStart(View view) throws IOException {
 
-        this.writeParameters();
+        this.dataWriter.writeData();
 
         // create an 'Intent' so we can start the new activity
         Intent intent = new Intent(this, TimerActivity.class);
@@ -484,6 +396,7 @@ public class MainActivity extends Activity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     this.setParameters();
                     this.updateData();
+                    this.onStart();
                 } else { // if the permission wasn't granted a.k.a we can't write
                     Toast.makeText(MainActivity.this, "The app won't be able to save your values", Toast.LENGTH_SHORT).show();
                 }

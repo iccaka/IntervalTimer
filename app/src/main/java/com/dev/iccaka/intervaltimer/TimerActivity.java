@@ -75,6 +75,8 @@ public class TimerActivity extends Activity {
     private boolean isWorkOn;
     private boolean hasRestBeenPaused;
     private boolean hasWorkBeenPaused;
+    private boolean isRestTimerOff;
+    private boolean isPauseStateOn;
     //========================================================
 
     private void createNotificationChannel() {
@@ -94,6 +96,11 @@ public class TimerActivity extends Activity {
     // Methods to start the 2 timers
     private void startWorkTimer() {
 
+        if (this.isRestTimerOff && this.sets == 0) {
+            this.endTimerAfterCompletion();
+            return;
+        }
+
         // the work timer is going to be started, so we set 'isWorkOn' to true
         this.isWorkOn = true;
 
@@ -103,7 +110,7 @@ public class TimerActivity extends Activity {
         // start the proper sound so we know when to work
         this.mpToWork.start();
 
-        this.updateStartingFields();
+        this.updateCurrentWithStartingFields();
 
         // if this timer has ever been paused - reset the parameters to their default values from MainActivity
         if (this.hasWorkBeenPaused) {
@@ -144,6 +151,11 @@ public class TimerActivity extends Activity {
 
     private void startRestTimer() { // A method used to start the rest timer a.k.a the timer stars when it's time for you to do a lightweight exercise, for example
 
+        if (this.isRestTimerOff) {
+            this.startWorkTimer();
+            return;
+        }
+
         // right now the 'work' timer isn't working, so we set 'isWorkOn' to false
         this.isWorkOn = false;
 
@@ -153,7 +165,7 @@ public class TimerActivity extends Activity {
         // start the proper sound so we know when to rest
         this.mpToRest.start();
 
-        this.updateStartingFields();
+        this.updateCurrentWithStartingFields();
 
         // if this timer has ever been paused - reset the parameters to their default values from MainActivity
         if (this.hasRestBeenPaused) {
@@ -291,20 +303,21 @@ public class TimerActivity extends Activity {
     }
     //========================================================
 
-    private void updateStartingFields() {
+    private void updateCurrentWithStartingFields() {
         this.workSecs = this.startingWorkSecs;
         this.workMins = this.startingWorkMins;
         this.restSecs = this.startingRestSecs;
         this.restMins = this.startingRestMins;
     }
 
-    /*private void updatePausedFields() {
-        this.pausedSets = this.sets;
-        this.pausedWorkSecs = this.workSecs + 1;
-        this.pausedWorkMins = this.workMins;
-        this.pausedRestSecs = this.restSecs + 1;
-        this.pausedRestMins = this.restMins;
-    }*/
+    private void updateStartingWithCurrentFields() {
+        // assign the proper values to the 'starting' parameters, so we always know from where we've started
+        this.startingSets = this.sets;
+        this.startingWorkSecs = this.workSecs;
+        this.startingWorkMins = this.workMins;
+        this.startingRestSecs = this.restSecs;
+        this.startingRestMins = this.restMins;
+    }
 
     private void updatePausedFields() {
         this.pausedSets = this.sets;
@@ -358,17 +371,16 @@ public class TimerActivity extends Activity {
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_timer);
-
-        // assign the default values to the 3 booleans
+    private void assignDefaultBooleanValues() { // initializes the booleans with their default values
         this.isWorkOn = true;
         this.hasRestBeenPaused = false;
         this.hasWorkBeenPaused = false;
+        this.isRestTimerOff = false;
+        this.isPauseStateOn = false;
+    }
 
-        // get the view using 'findViewById' and the 'R' class
+    private void getTimerViews() {
+        // get the views using 'findViewById' and the 'R' class
         this.continueBtn = findViewById(R.id.continueBtn);
         this.pauseBtn = findViewById(R.id.pauseBtn);
         this.endBtn = findViewById(R.id.endBtn);
@@ -378,26 +390,74 @@ public class TimerActivity extends Activity {
         this.trainingRestQuantity = findViewById(R.id.trainingRestQuantity);
         this.trainingMotivationalText = findViewById(R.id.trainingMotivationalText);
         this.trainingPausedText = findViewById(R.id.trainingPausedText);
+    }
 
+    private void getSounds() {
+        // get the proper sounds from the 'res/raw' folder and assign them to the corresponding fields
+        this.mpToWork = MediaPlayer.create(this.getApplicationContext(), R.raw.work);
+        this.mpToRest = MediaPlayer.create(this.getApplicationContext(), R.raw.rest);
+        this.mpToPause = MediaPlayer.create(this.getApplicationContext(), R.raw.pause);
+        this.mpToResume = MediaPlayer.create(this.getApplicationContext(), R.raw.resume);
+        this.mpToEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.end);
+        this.mpToFullyEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.fullyend);
+        this.mpToTick = MediaPlayer.create(this.getApplicationContext(), R.raw.tick);
+    }
+
+    private void assignDefaultViewVisibilities() {
         // set a bunch of different visibilities to the views, so we don't see redundant stuff on the screen
         this.endBtn.setVisibility(View.GONE);
         this.continueBtn.setVisibility(View.GONE);
         this.trainingPausedText.setVisibility(View.GONE);
+    }
 
+    private void setTypeFacesToViews() {
+        Typeface tf = ResourcesCompat.getFont(getApplicationContext(), R.font.monkey);
+        this.continueBtn.setTypeface(tf);
+        this.pauseBtn.setTypeface(tf);
+        this.endBtn.setTypeface(tf);
+        this.trainingSetsQuantity.setTypeface(tf);
+        this.trainingWorkQuantity.setTypeface(tf);
+        this.trainingRestQuantity.setTypeface(tf);
+        this.trainingMotivationalText.setTypeface(tf);
+        this.trainingPausedText.setTypeface(tf);
+    }
+
+    private void getBundleExtrasFromMainActivity() {
         // get the 'Bundle' that was passed to us from the MainActivity class a.k.a get the values of the parameters so we know how long the timers should be
         Bundle mainActivityBundle = getIntent().getExtras();
-        this.sets = mainActivityBundle.getInt("sets");
-        this.workSecs = mainActivityBundle.getInt("workSecs") + 1;
-        this.workMins = mainActivityBundle.getInt("workMins");
-        this.restSecs = mainActivityBundle.getInt("restSecs") + 1;
-        this.restMins = mainActivityBundle.getInt("restMins");
+        if (mainActivityBundle != null) {  // if it's empty...
+            this.sets = mainActivityBundle.getInt("sets");
+            this.workSecs = mainActivityBundle.getInt("workSecs") + 1;
+            this.workMins = mainActivityBundle.getInt("workMins");
+            this.restSecs = mainActivityBundle.getInt("restSecs") + 1;
+            this.restMins = mainActivityBundle.getInt("restMins");
+        } else {  // ... exit the activity
+            this.finish();
+        }
+    }
 
-        // assign the proper values to the 'starting' parameters, so we always know from where we've started
-        this.startingSets = this.sets;
-        this.startingWorkSecs = this.workSecs;
-        this.startingWorkMins = this.workMins;
-        this.startingRestSecs = this.restSecs;
-        this.startingRestMins = this.restMins;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_timer);
+
+        this.getBundleExtrasFromMainActivity();
+        this.assignDefaultBooleanValues();
+        this.getTimerViews();
+        this.assignDefaultViewVisibilities();
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            this.setTypeFacesToViews();
+        }
+
+        this.getSounds();
+        // create the notification channel, so we can have a notification
+        this.createNotificationChannel();
+        this.updateStartingWithCurrentFields();
+
+        if (this.restMins == 0 && this.restSecs == 1) {
+            this.isRestTimerOff = true;
+        }
 
         // create the two timers a.k.a work and rest
         this.workCountDownTimer = new CountDownTimer((((this.workMins * 60) + this.workSecs) * 1000), 1000) {
@@ -435,35 +495,11 @@ public class TimerActivity extends Activity {
             }
         };
 
-        // get the proper sounds from the 'res/raw' folder and assign them to the corresponding fields
-        this.mpToWork = MediaPlayer.create(this.getApplicationContext(), R.raw.work);
-        this.mpToRest = MediaPlayer.create(this.getApplicationContext(), R.raw.rest);
-        this.mpToPause = MediaPlayer.create(this.getApplicationContext(), R.raw.pause);
-        this.mpToResume = MediaPlayer.create(this.getApplicationContext(), R.raw.resume);
-        this.mpToEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.end);
-        this.mpToFullyEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.fullyend);
-        this.mpToTick = MediaPlayer.create(this.getApplicationContext(), R.raw.tick);
-
         // set an event to the 'end' button, because it has to be a long, not a normal one
         this.endBtn.setOnLongClickListener(v -> {
             this.endTimer(new View(this.getApplicationContext()));
             return false;
         });
-
-        // create the notification channel, so we can have a notification
-        this.createNotificationChannel();
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            Typeface tf = ResourcesCompat.getFont(getApplicationContext(), R.font.monkey);
-            this.continueBtn.setTypeface(tf);
-            this.pauseBtn.setTypeface(tf);
-            this.endBtn.setTypeface(tf);
-            this.trainingSetsQuantity.setTypeface(tf);
-            this.trainingWorkQuantity.setTypeface(tf);
-            this.trainingRestQuantity.setTypeface(tf);
-            this.trainingMotivationalText.setTypeface(tf);
-            this.trainingPausedText.setTypeface(tf);
-        }
 
         this.updateData();
 
@@ -491,6 +527,8 @@ public class TimerActivity extends Activity {
     // Methods to continue or pause the timers
     public void continueTimer(View view) {
         this.mpToResume.start();
+
+        this.isPauseStateOn = false;
 
         if (this.isWorkOn) {
             this.workCountDownTimer = new CountDownTimer((((this.pausedWorkMins * 60) + this.pausedWorkSecs + 1) * 1000), 1000) {
@@ -542,6 +580,8 @@ public class TimerActivity extends Activity {
 
     public void pauseTimer(View view) {
 
+        this.isPauseStateOn = true;
+
         // set the background color of the activity to yellow, so we know that the 'pause' phase is on
         this.thisActivity.setBackgroundColor(Color.YELLOW);
 
@@ -572,6 +612,13 @@ public class TimerActivity extends Activity {
     // Method invoked once we press the 'back' button on our phones
     @Override
     public void onBackPressed() {
+        // if any of the timers is currently paused, end this activity
+        if (this.isPauseStateOn) {
+            this.endTimer(this.endBtn);
+            return;
+        }
+        // if it's not, just pause it using the custom method
+        this.pauseTimer(this.pauseBtn);
     }
 
 }
