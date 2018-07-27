@@ -379,7 +379,7 @@ public class TimerActivity extends Activity {
         this.isPauseStateOn = false;
     }
 
-    private void getTimerViews() {
+    private void getViews() {
         // get the views using 'findViewById' and the 'R' class
         this.continueBtn = findViewById(R.id.continueBtn);
         this.pauseBtn = findViewById(R.id.pauseBtn);
@@ -442,22 +442,22 @@ public class TimerActivity extends Activity {
         setContentView(R.layout.activity_timer);
 
         this.getBundleExtrasFromMainActivity();
-        this.assignDefaultBooleanValues();
-        this.getTimerViews();
-        this.assignDefaultViewVisibilities();
+
+        if (this.restMins == 0 && this.restSecs == 1) {
+            this.isRestTimerOff = true;
+        }
+
+        this.updateStartingWithCurrentFields();
+        this.getSounds();
+        this.getViews();
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             this.setTypeFacesToViews();
         }
 
-        this.getSounds();
-        // create the notification channel, so we can have a notification
+        this.assignDefaultBooleanValues();
+        this.assignDefaultViewVisibilities();
         this.createNotificationChannel();
-        this.updateStartingWithCurrentFields();
-
-        if (this.restMins == 0 && this.restSecs == 1) {
-            this.isRestTimerOff = true;
-        }
 
         // create the two timers a.k.a work and rest
         this.workCountDownTimer = new CountDownTimer((((this.workMins * 60) + this.workSecs) * 1000), 1000) {
