@@ -28,7 +28,7 @@
                 android:gravity="center_horizontal"
                 android:text="@string/starting_sets_timer"
                 android:textColor="#000"
-                android:textSize="36sp" />
+                android:textSize="72sp" />
 
             <TextView
                 android:id="@+id/trainingWorkQuantity"
@@ -85,7 +85,8 @@
                 android:onClick="pauseTimer"
                 android:text="@string/btn_pause"
                 android:textAllCaps="true"
-                android:textSize="24sp" />
+                android:textStyle="bold"
+                android:textSize="46sp" />
 
             <Button
                 android:id="@+id/continueBtn"
@@ -96,7 +97,8 @@
                 android:onClick="continueTimer"
                 android:text="@string/btn_continue"
                 android:textAllCaps="true"
-                android:textSize="24sp" />
+                android:textStyle="bold"
+                android:textSize="46sp" />
 
             <Button
                 android:id="@+id/endBtn"
@@ -106,7 +108,8 @@
                 android:fontFamily="@font/monkey"
                 android:text="@string/btn_end"
                 android:textAllCaps="true"
-                android:textSize="24sp" />
+                android:textStyle="bold"
+                android:textSize="46sp" />
         </LinearLayout>
 
 

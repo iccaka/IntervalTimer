@@ -17,11 +17,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dev.iccaka.intervaltimer.Exceptions.DirectoryNotFoundException;
+import com.dev.iccaka.intervaltimer.Interfaces.IDataReader;
+import com.dev.iccaka.intervaltimer.Interfaces.IDataWriter;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +36,8 @@ public class MainActivity extends Activity {
     private int restMins;
     //========================================================
 
-    private DataWriter dataWriter;
+    private IDataWriter<Integer> dataWriter;
+    private IDataReader<Integer> dataReader;
 
     // Views from activity_main.xml
     private TextView setsTextView;
@@ -67,7 +66,7 @@ public class MainActivity extends Activity {
         if (this.isExternalStorageReadable()) {
 
             try {
-                List<Integer> parameters = this.readParameters();
+                List<Integer> parameters = this.dataReader.readData();
 
                 // set the new values
                 this.sets = parameters.get(0);
@@ -76,12 +75,12 @@ public class MainActivity extends Activity {
                 this.restSecs = parameters.get(3);
                 this.restMins = parameters.get(4);
             } catch (IOException e) {
-                this.initializeDefaultParameters();
+                this.initializeDefaultValues();
             }
 
         } else {
             Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable.", Toast.LENGTH_LONG).show();
-            this.initializeDefaultParameters();
+            this.initializeDefaultValues();
             Toast.makeText(this.getApplicationContext(), "Initialized the default values.", Toast.LENGTH_LONG).show();
         }
     }
@@ -97,110 +96,15 @@ public class MainActivity extends Activity {
 
         return Collections.unmodifiableList(parameters);
     }
-
-    private List<Integer> readParameters() throws IOException {  // Reads the parameters from the 'parameters' file inside the external storage
-
-        List<Integer> parameters = new ArrayList<>();
-
-        // create a new directory inside the external storage
-        File root = new File(Environment.getExternalStorageDirectory(), "Notes");
-
-        // if it doesn't exist...
-        if (!root.exists()) {
-            throw new DirectoryNotFoundException("The 'Notes' directory wasn't found");
-        }
-
-        // get the 'parameters' file, from where we will read the values of the parameters
-        File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
-        // FileReader reader = new FileReader(gpxfile);
-        FileInputStream fis = new FileInputStream(gpxfile);
-
-        StringBuilder builder = new StringBuilder();
-
-        while (true) {
-            int currChar = fis.read();
-
-            if (currChar == -1) {
-                break;
-            }
-
-            builder.append((char) currChar);
-        }
-
-        String[] values = builder.toString().split(" ");
-
-        for (String value : values) {
-            parameters.add(Integer.parseInt(value));
-        }
-
-        fis.close();
-
-        return Collections.unmodifiableList(parameters);
-    }
-
-    private void writeParameters() {  // Writes the current parameters from the 'getparameters' method to the parameters file
-        // get the current values of the parameters and put them into an 'Integer' list
-        List<Integer> parameters = this.getParameters();
-
-        // create a StringBuilder where we'll put our data about the parameters
-        StringBuilder result = new StringBuilder();
-
-        // create a string using the template('sets' 'workSecs' 'workMin' 'restSecs' 'restMins')
-        for (int a : parameters) {
-            result.append(a).append(" ");
-        }
-
-        /* check if the external storage is accessible, using the custom
-           'isExternalStorageWritable' method, so we can write to the parameters file */
-        if (this.isExternalStorageWritable()) {
-            try {
-                // create a new directory inside the external storage
-                File root = new File(Environment.getExternalStorageDirectory(), "Notes");
-
-                // if it doesn't exist...
-                if (!root.exists()) {
-                    // ...create it and all the corresponding files inside needed to function properly
-                    root.mkdirs();
-                }
-
-                // now create the real 'parameters' file, using the default name, where we will write the values of the parameters
-                File gpxfile = new File(root, MainActivity.DEFAULT_FILE_NAME);
-                // create a 'FileWriter' by passing 'gpxfile' to it's constructor
-                FileWriter writer = new FileWriter(gpxfile);
-
-                // append the string('StringBuilder result = new StringBuilder()')
-                writer.append(result.toString());
-                // close the data stream
-                writer.close();
-
-            } catch (IOException e) {
-                Toast.makeText(this.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        } else {  // if it's not accessible, show a 'Toast'
-            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable, the app won't be able to save your custom values.", Toast.LENGTH_LONG).show();
-        }
-
-    }
     //========================================================
 
     // Gets the current parameters values back to their default ones
-    private void initializeDefaultParameters() {
+    private void initializeDefaultValues() {
         this.sets = DEFAULT_SETS;
         this.workSecs = DEFAULT_WORK_SECS;
         this.workMins = DEFAULT_WORK_MINS;
         this.restSecs = DEFAULT_REST_SECS;
         this.restMins = DEFAULT_REST_MINS;
-    }
-
-    // Checks if the external storage is available for read and write
-    private boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-
-        return false;
     }
 
     // Checks if the external storage is available to at least read
@@ -266,14 +170,7 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        this.isBackPressedTwice = false;
-
+    private void getViews() {
         //get the views from the R class
         this.setsMinusBtn = findViewById(R.id.setsMinusBtn);
         this.setsPlusBtn = findViewById(R.id.setsPlusBtn);
@@ -284,8 +181,10 @@ public class MainActivity extends Activity {
         this.setsTextView = findViewById(R.id.setsQuantity);
         this.workTextView = findViewById(R.id.workQuantity);
         this.restTextView = findViewById(R.id.restQuantity);
-        //========================================================
+    }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private void attachListenersToButtons() {
         //attach listeners to all buttons
         this.setsPlusBtn.setOnTouchListener(new RepeatListener(600, 50, v -> setsPlusBtn.performClick()));
         this.setsMinusBtn.setOnTouchListener(new RepeatListener(600, 50, v -> setsMinusBtn.performClick()));
@@ -293,60 +192,73 @@ public class MainActivity extends Activity {
         this.workMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> workMinusBtn.performClick()));
         this.restPlusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restPlusBtn.performClick()));
         this.restMinusBtn.setOnTouchListener(new RepeatListener(600, 25, v -> restMinusBtn.performClick()));
-        //========================================================
+    }
 
+    private void setTypeFacesToViews() {
+        Typeface tf = ResourcesCompat.getFont(getApplicationContext(), R.font.monkey);
+        TextView stv = findViewById(R.id.setsText);
+        TextView wtv = findViewById(R.id.workText);
+        TextView rtv = findViewById(R.id.restText);
+        Button startBtn = findViewById(R.id.startBtn);
+
+        stv.setTypeface(tf);
+        wtv.setTypeface(tf);
+        rtv.setTypeface(tf);
+        startBtn.setTypeface(tf);
+        this.setsMinusBtn.setTypeface(tf);
+        this.setsPlusBtn.setTypeface(tf);
+        this.workMinusBtn.setTypeface(tf);
+        this.workPlusBtn.setTypeface(tf);
+        this.restMinusBtn.setTypeface(tf);
+        this.restPlusBtn.setTypeface(tf);
+        this.setsTextView.setTypeface(tf);
+        this.workTextView.setTypeface(tf);
+        this.restTextView.setTypeface(tf);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        this.isBackPressedTwice = false;
+
+        this.getViews();
+        this.attachListenersToButtons();
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            this.setTypeFacesToViews();
+        }
+
+        this.dataReader = new MainActivityDataReader();
+        this.dataWriter = new MainActivityDataWriter();
 
         if (!this.isExternalStorageAccessPermissionGranted()) {
             this.requestWriteStoragePermission();
+
+            if (!this.isExternalStorageAccessPermissionGranted()) {
+                this.initializeDefaultValues();
+            }
+        } else {
+            this.setParameters();
         }
+
+        this.updateData();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
 
         if (this.isExternalStorageAccessPermissionGranted()) {
-            //set the parameters by reading their values from the 'parameters' file
-            this.setParameters();
-        } else {
-            initializeDefaultParameters();
+            this.dataWriter.addData(this.getParameters());
+            try {
+                this.dataWriter.writeData();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-
-
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O){
-            Typeface tf = ResourcesCompat.getFont(getApplicationContext(), R.font.monkey);
-            TextView stv = findViewById(R.id.setsText);
-            TextView wtv = findViewById(R.id.workText);
-            TextView rtv = findViewById(R.id.restText);
-            Button startBtn = findViewById(R.id.startBtn);
-
-            stv.setTypeface(tf);
-            wtv.setTypeface(tf);
-            rtv.setTypeface(tf);
-            startBtn.setTypeface(tf);
-            this.setsMinusBtn.setTypeface(tf);
-            this.setsPlusBtn.setTypeface(tf);
-            this.workMinusBtn.setTypeface(tf);
-            this.workPlusBtn.setTypeface(tf);
-            this.restMinusBtn.setTypeface(tf);
-            this.restPlusBtn.setTypeface(tf);
-            this.setsTextView.setTypeface(tf);
-            this.workTextView.setTypeface(tf);
-            this.restTextView.setTypeface(tf);
-        }
-
-        this.updateData();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        this.setParameters();
-        this.updateData();
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-
-        this.setParameters();
-        this.updateData();
     }
 
     // Methods to properly increment the parameters when you click on their corresponding buttons
@@ -451,12 +363,8 @@ public class MainActivity extends Activity {
 
     // Method to start the timer and pass the parameters to the TimerActivity class
     public void timerStart(View view) {
-
-        this.writeParameters();
-
         // create an 'Intent' so we can start the new activity
         Intent intent = new Intent(this, TimerActivity.class);
-
         // put the parameters' values inside the 'Intent'
         intent.putExtra("sets", this.sets);
         intent.putExtra("workSecs", this.workSecs);
@@ -466,25 +374,6 @@ public class MainActivity extends Activity {
 
         // finally start the activity
         startActivity(intent);
-
-    }
-
-    /* Method that gets invoked and handles permission results differently ('requestCode'
-       1 is when we enable both write and read a.k.a when we start the timer)
-    */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case 1:
-                // if the write permission was granted
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    this.setParameters();
-                    this.updateData();
-                } else { // if the permission wasn't granted a.k.a we can't write
-                    Toast.makeText(MainActivity.this, "The app won't be able to save your values", Toast.LENGTH_SHORT).show();
-                }
-                break;
-        }
     }
 
     @Override
@@ -498,7 +387,7 @@ public class MainActivity extends Activity {
             Toast.makeText(MainActivity.this, "Press BACK once again to exit", Toast.LENGTH_SHORT).show();
 
             // start a 'Handler' and if we don't press 'BACK' again in 2 seconds, the boolean gets back to 'false' and the whole thing starts again after we press 'BACK'
-            new Handler().postDelayed(() -> isBackPressedTwice = false, 2000);
+            new Handler().postDelayed(() -> this.isBackPressedTwice = false, 2000);
         }
     }
 }

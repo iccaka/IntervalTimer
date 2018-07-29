@@ -1,25 +1,27 @@
 package com.dev.iccaka.intervaltimer;
 
 import android.os.Environment;
+
+import com.dev.iccaka.intervaltimer.Interfaces.IDataWriter;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
-public class MainActivityDataWriter implements DataWriter {
+public class MainActivityDataWriter implements IDataWriter<Integer> {
 
     private List<Integer> dataList;
 
-    public MainActivityDataWriter(){
-        this(new Integer[]{});
+    public MainActivityDataWriter() {
+        this.dataList = new ArrayList<>();
     }
 
-    public MainActivityDataWriter(Integer... data) {
-        this.dataList = new ArrayList<>();
-        this.dataList.addAll(Arrays.asList(data));
+    @Override
+    public void addData(List<Integer> dataList) {
+        this.dataList.addAll(dataList);
     }
 
     @Override
@@ -54,11 +56,9 @@ public class MainActivityDataWriter implements DataWriter {
                 writer.close();
 
             } catch (IOException e) {
-                throw new IOException(e.getMessage());
+                throw new IOException("Your storage is currently, please try again later.");
             }
         } else {  // if it's not accessible, show a 'Toast'
-//            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable, the app won't be able to save your custom values.", Toast.LENGTH_LONG).show();
-//            return 1;
             throw new IOException("Your external storage is currently unavailable, the app won't be able to save your custom values.");
         }
     }
