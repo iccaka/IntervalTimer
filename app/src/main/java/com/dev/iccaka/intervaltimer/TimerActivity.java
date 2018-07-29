@@ -351,7 +351,7 @@ public class TimerActivity extends Activity {
         // start the proper sound so we know when it has ended a.k.a feedback
         this.mpToEnd.start();
 
-        this.finish();
+        super.onBackPressed();
 
     }
 
@@ -360,7 +360,7 @@ public class TimerActivity extends Activity {
 
         Toast.makeText(this.getApplicationContext(), "Workout done!", Toast.LENGTH_SHORT).show();
 
-        this.finish();
+        super.onBackPressed();
     }
 
     private void stopCurrentTimer() {

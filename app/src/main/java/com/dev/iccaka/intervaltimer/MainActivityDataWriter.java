@@ -56,7 +56,7 @@ public class MainActivityDataWriter implements IDataWriter<Integer> {
                 writer.close();
 
             } catch (IOException e) {
-                throw new IOException("Your storage is currently, please try again later.");
+                throw new IOException("Your storage is currently unavailable, please try again later.");
             }
         } else {  // if it's not accessible, show a 'Toast'
             throw new IOException("Your external storage is currently unavailable, the app won't be able to save your custom values.");

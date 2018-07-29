@@ -2,6 +2,7 @@ package com.dev.iccaka.intervaltimer;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -60,7 +61,7 @@ public class MainActivity extends Activity {
     public static final int DEFAULT_REST_MINS = 0;
     public static final String DEFAULT_FILE_NAME = "parameters";
 
-    // Methods to read or write the parameters to the corresponding file
+    // Methods to read the parameters to the corresponding file
     private void setParameters() {
         // get the parameters from the external storage
         if (this.isExternalStorageReadable()) {
@@ -248,17 +249,37 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onResume() {
+        super.onResume();
 
-        if (this.isExternalStorageAccessPermissionGranted()) {
-            this.dataWriter.addData(this.getParameters());
-            try {
-                this.dataWriter.writeData();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (getActionBar() != null) {
+            getActionBar().hide();
         }
+    }
+
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//
+//        if (this.isExternalStorageAccessPermissionGranted()) {
+//            this.dataWriter.addData(this.getParameters());
+//            try {
+//                this.dataWriter.writeData();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
     }
 
     // Methods to properly increment the parameters when you click on their corresponding buttons
@@ -353,16 +374,20 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    /* Method used to request permission for writing inside the external storage
-    (at the same time it also receives reading permission). After we receive a result
-    from this method, we go to 'onRequestPermissionsResult'
+    /*
+      Method used to request permission for writing inside the external
+      storage (at the same time it also receives reading permission).
     */
     public void requestWriteStoragePermission() {
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
     }
 
     // Method to start the timer and pass the parameters to the TimerActivity class
-    public void timerStart(View view) {
+    public void timerStart(View view) throws IOException {
+
+        this.dataWriter.addData(this.getParameters());
+        this.dataWriter.writeData();
+
         // create an 'Intent' so we can start the new activity
         Intent intent = new Intent(this, TimerActivity.class);
         // put the parameters' values inside the 'Intent'
