@@ -379,6 +379,13 @@ public class TimerActivity extends Activity {
         this.isPauseStateOn = false;
     }
 
+    private void assignDefaultViewVisibilities() {
+        // set a bunch of different visibilities to the views, so we don't see redundant stuff on the screen
+        this.endBtn.setVisibility(View.GONE);
+        this.continueBtn.setVisibility(View.GONE);
+        this.trainingPausedText.setVisibility(View.GONE);
+    }
+
     private void getViews() {
         // get the views using 'findViewById' and the 'R' class
         this.continueBtn = findViewById(R.id.continueBtn);
@@ -401,13 +408,6 @@ public class TimerActivity extends Activity {
         this.mpToEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.end);
         this.mpToFullyEnd = MediaPlayer.create(this.getApplicationContext(), R.raw.fullyend);
         this.mpToTick = MediaPlayer.create(this.getApplicationContext(), R.raw.tick);
-    }
-
-    private void assignDefaultViewVisibilities() {
-        // set a bunch of different visibilities to the views, so we don't see redundant stuff on the screen
-        this.endBtn.setVisibility(View.GONE);
-        this.continueBtn.setVisibility(View.GONE);
-        this.trainingPausedText.setVisibility(View.GONE);
     }
 
     private void setTypeFacesToViews() {
@@ -442,6 +442,7 @@ public class TimerActivity extends Activity {
         setContentView(R.layout.activity_timer);
 
         this.getBundleExtrasFromMainActivity();
+        this.assignDefaultBooleanValues();
 
         if (this.restMins == 0 && this.restSecs == 1) {
             this.isRestTimerOff = true;
@@ -455,7 +456,6 @@ public class TimerActivity extends Activity {
             this.setTypeFacesToViews();
         }
 
-        this.assignDefaultBooleanValues();
         this.assignDefaultViewVisibilities();
         this.createNotificationChannel();
 

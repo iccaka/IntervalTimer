@@ -248,39 +248,16 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
-        if (getActionBar() != null) {
-            getActionBar().hide();
-        }
-
-        this.setParameters();
-        this.updateData();
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
 
-        this.dataWriter.addData(this.getParameters());
-        try {
-            this.dataWriter.writeData();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        this.dataWriter.addData(this.getParameters());
-        try {
-            this.dataWriter.writeData();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (this.isExternalStorageAccessPermissionGranted()) {
+            this.dataWriter.addData(this.getParameters());
+            try {
+                this.dataWriter.writeData();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -385,11 +362,7 @@ public class MainActivity extends Activity {
     }
 
     // Method to start the timer and pass the parameters to the TimerActivity class
-    public void timerStart(View view) throws IOException {
-
-        this.dataWriter.addData(this.getParameters());
-        this.dataWriter.writeData();
-
+    public void timerStart(View view) {
         // create an 'Intent' so we can start the new activity
         Intent intent = new Intent(this, TimerActivity.class);
         // put the parameters' values inside the 'Intent'
