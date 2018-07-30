@@ -518,7 +518,6 @@ public class TimerActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
         if (getActionBar() != null) {
             getActionBar().hide();
         }

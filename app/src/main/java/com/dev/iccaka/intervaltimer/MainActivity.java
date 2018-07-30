@@ -1,30 +1,19 @@
 package com.dev.iccaka.intervaltimer;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.dev.iccaka.intervaltimer.Interfaces.IDataReader;
-import com.dev.iccaka.intervaltimer.Interfaces.IDataWriter;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 
 public class MainActivity extends Activity {
@@ -37,8 +26,7 @@ public class MainActivity extends Activity {
     private int restMins;
     //========================================================
 
-    private IDataWriter<Integer> dataWriter;
-    private IDataReader<Integer> dataReader;
+    private SharedPreferences sharedPreferences;
 
     // Views from activity_main.xml
     private TextView setsTextView;
@@ -60,72 +48,6 @@ public class MainActivity extends Activity {
     public static final int DEFAULT_REST_SECS = 30;
     public static final int DEFAULT_REST_MINS = 0;
     public static final String DEFAULT_FILE_NAME = "parameters";
-
-    // Methods to read the parameters to the corresponding file
-    private void setParameters() {
-        // get the parameters from the external storage
-        if (this.isExternalStorageReadable()) {
-
-            try {
-                List<Integer> parameters = this.dataReader.readData();
-
-                // set the new values
-                this.sets = parameters.get(0);
-                this.workSecs = parameters.get(1);
-                this.workMins = parameters.get(2);
-                this.restSecs = parameters.get(3);
-                this.restMins = parameters.get(4);
-            } catch (IOException e) {
-                this.initializeDefaultValues();
-            }
-
-        } else {
-            Toast.makeText(this.getApplicationContext(), "Your external storage is currently unavailable.", Toast.LENGTH_LONG).show();
-            this.initializeDefaultValues();
-            Toast.makeText(this.getApplicationContext(), "Initialized the default values.", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private List<Integer> getParameters() {  // Returns a list containing the current values of the parameters
-        ArrayList<Integer> parameters = new ArrayList<>();
-
-        parameters.add(this.sets);
-        parameters.add(this.workSecs);
-        parameters.add(this.workMins);
-        parameters.add(this.restSecs);
-        parameters.add(this.restMins);
-
-        return Collections.unmodifiableList(parameters);
-    }
-    //========================================================
-
-    // Gets the current parameters values back to their default ones
-    private void initializeDefaultValues() {
-        this.sets = DEFAULT_SETS;
-        this.workSecs = DEFAULT_WORK_SECS;
-        this.workMins = DEFAULT_WORK_MINS;
-        this.restSecs = DEFAULT_REST_SECS;
-        this.restMins = DEFAULT_REST_MINS;
-    }
-
-    // Checks if the external storage is available to at least read
-    private boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-
-        if (Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    // Checks if the user had given permission for us to access his/her storage
-    private boolean isExternalStorageAccessPermissionGranted() {
-        String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
-        int result = getApplicationContext().checkCallingOrSelfPermission(permission);
-
-        return (result == PackageManager.PERMISSION_GRANTED);
-    }
 
     // Custom methods to get the parameters on the screen
     private void updateData() {
@@ -170,6 +92,15 @@ public class MainActivity extends Activity {
         }
     }
     //========================================================
+
+    // Gets the current parameters values back to their default ones
+    private void initializeDefaultValues() {
+        this.sets = DEFAULT_SETS;
+        this.workSecs = DEFAULT_WORK_SECS;
+        this.workMins = DEFAULT_WORK_MINS;
+        this.restSecs = DEFAULT_REST_SECS;
+        this.restMins = DEFAULT_REST_MINS;
+    }
 
     private void getViews() {
         //get the views from the R class
@@ -217,6 +148,29 @@ public class MainActivity extends Activity {
         this.restTextView.setTypeface(tf);
     }
 
+    private void getSharedPreferences() {
+        this.sharedPreferences = getSharedPreferences(DEFAULT_FILE_NAME, Context.MODE_PRIVATE);
+        if (this.sharedPreferences.contains("sets")) {
+            this.sets = this.sharedPreferences.getInt("sets", DEFAULT_SETS);
+            this.workSecs = this.sharedPreferences.getInt("workSecs", DEFAULT_WORK_SECS);
+            this.workMins = this.sharedPreferences.getInt("workMins", DEFAULT_WORK_MINS);
+            this.restSecs = this.sharedPreferences.getInt("restSecs", DEFAULT_REST_SECS);
+            this.restMins = this.sharedPreferences.getInt("restMins", DEFAULT_REST_MINS);
+        } else {
+            this.initializeDefaultValues();
+        }
+    }
+
+    private void putSharedPreferences() {
+        SharedPreferences.Editor editor = this.sharedPreferences.edit();
+        editor.putInt("sets", this.sets);
+        editor.putInt("workSecs", this.workSecs);
+        editor.putInt("workMins", this.workMins);
+        editor.putInt("restSecs", this.restSecs);
+        editor.putInt("restMins", this.restMins);
+        editor.commit();
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
@@ -232,20 +186,20 @@ public class MainActivity extends Activity {
             this.setTypeFacesToViews();
         }
 
-        this.dataReader = new MainActivityDataReader();
-        this.dataWriter = new MainActivityDataWriter();
+//        this.dataReader = new MainActivityDataReader();
+//        this.dataWriter = new MainActivityDataWriter();
+//
+//        if (savedInstanceState != null) {
+//            this.sets = savedInstanceState.getInt("sets");
+//            this.workSecs = savedInstanceState.getInt("workSecs");
+//            this.workMins = savedInstanceState.getInt("workMins");
+//            this.restSecs = savedInstanceState.getInt("restSecs");
+//            this.restMins = savedInstanceState.getInt("restMins");
+//
+//            this.updateData();
+//        }
 
-        if (!this.isExternalStorageAccessPermissionGranted()) {
-            this.requestWriteStoragePermission();
-
-            if (!this.isExternalStorageAccessPermissionGranted()) {
-                this.initializeDefaultValues();
-            }
-        } else {
-            this.setParameters();
-        }
-
-        this.updateData();
+        this.getSharedPreferences();
     }
 
     @Override
@@ -255,31 +209,17 @@ public class MainActivity extends Activity {
         if (getActionBar() != null) {
             getActionBar().hide();
         }
+
+        this.getSharedPreferences();
+        this.updateData();
     }
 
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//
-//        if (this.isExternalStorageAccessPermissionGranted()) {
-//            this.dataWriter.addData(this.getParameters());
-//            try {
-//                this.dataWriter.writeData();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-
-
+    @SuppressLint("ApplySharedPref")
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
+    protected void onPause() {
+        super.onPause();
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
+        this.putSharedPreferences();
     }
 
     // Methods to properly increment the parameters when you click on their corresponding buttons
@@ -374,19 +314,17 @@ public class MainActivity extends Activity {
     }
     //========================================================
 
-    /*
-      Method used to request permission for writing inside the external
-      storage (at the same time it also receives reading permission).
-    */
-    public void requestWriteStoragePermission() {
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-    }
-
     // Method to start the timer and pass the parameters to the TimerActivity class
-    public void timerStart(View view) throws IOException {
+    @SuppressLint("ApplySharedPref")
+    public void timerStart(View view) {
 
-        this.dataWriter.addData(this.getParameters());
-        this.dataWriter.writeData();
+        SharedPreferences.Editor editor = this.sharedPreferences.edit();
+        editor.putInt("sets", this.sets);
+        editor.putInt("workSecs", this.workSecs);
+        editor.putInt("workMins", this.workMins);
+        editor.putInt("restSecs", this.restSecs);
+        editor.putInt("restMins", this.restMins);
+        editor.commit();
 
         // create an 'Intent' so we can start the new activity
         Intent intent = new Intent(this, TimerActivity.class);
