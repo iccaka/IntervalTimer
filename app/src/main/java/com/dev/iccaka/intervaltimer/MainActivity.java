@@ -161,6 +161,7 @@ public class MainActivity extends Activity {
         }
     }
 
+    @SuppressLint("ApplySharedPref")
     private void putSharedPreferences() {
         SharedPreferences.Editor editor = this.sharedPreferences.edit();
         editor.putInt("sets", this.sets);
@@ -185,19 +186,6 @@ public class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             this.setTypeFacesToViews();
         }
-
-//        this.dataReader = new MainActivityDataReader();
-//        this.dataWriter = new MainActivityDataWriter();
-//
-//        if (savedInstanceState != null) {
-//            this.sets = savedInstanceState.getInt("sets");
-//            this.workSecs = savedInstanceState.getInt("workSecs");
-//            this.workMins = savedInstanceState.getInt("workMins");
-//            this.restSecs = savedInstanceState.getInt("restSecs");
-//            this.restMins = savedInstanceState.getInt("restMins");
-//
-//            this.updateData();
-//        }
 
         this.getSharedPreferences();
     }
