@@ -41,7 +41,6 @@ public class TimerActivity extends Activity {
     //========================================================
 
     // Starting parameters that we get from the main activity
-    private int startingSets;
     private int startingWorkSecs;
     private int startingWorkMins;
     private int startingRestMins;
@@ -49,7 +48,6 @@ public class TimerActivity extends Activity {
     //========================================================
 
     // Parameters when we stop, so we know where to continue from
-    private int pausedSets;
     private int pausedWorkSecs;
     private int pausedWorkMins;
     private int pausedRestSecs;
@@ -312,7 +310,6 @@ public class TimerActivity extends Activity {
 
     private void updateStartingWithCurrentFields() {
         // assign the proper values to the 'starting' parameters, so we always know from where we've started
-        this.startingSets = this.sets;
         this.startingWorkSecs = this.workSecs;
         this.startingWorkMins = this.workMins;
         this.startingRestSecs = this.restSecs;
@@ -320,7 +317,6 @@ public class TimerActivity extends Activity {
     }
 
     private void updatePausedFields() {
-        this.pausedSets = this.sets;
         this.pausedWorkSecs = ++this.workSecs;
         this.pausedWorkMins = this.workMins;
         this.pausedRestSecs = ++this.restSecs;
