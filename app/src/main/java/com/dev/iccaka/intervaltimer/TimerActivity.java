@@ -94,6 +94,7 @@ public class TimerActivity extends Activity {
     // Methods to start the 2 timers
     private void startWorkTimer() {
 
+        // if the rest timer hasn't been started and the remaining sets are 0, stop the timer
         if (this.isRestTimerOff && this.sets == 0) {
             this.endTimerAfterCompletion();
             return;
@@ -301,6 +302,22 @@ public class TimerActivity extends Activity {
     }
     //========================================================
 
+    private void createNotification() {
+//        Intent intent = new Intent(this, TimerActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+//
+//        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
+//                .setSmallIcon(R.drawable.ic_stat_paused_app)
+//                .setContentTitle("Sample title")
+//                .setContentText("Sample text")
+//                .setAutoCancel(true)
+//                .setContentIntent(pendingIntent);  // Open this activity when the notification is pressed
+//
+//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+//        notificationManager.notify("oneAndOnly", 1, mBuilder.build());
+    }
+
     private void updateCurrentWithStartingFields() {
         this.workSecs = this.startingWorkSecs;
         this.workMins = this.startingWorkMins;
@@ -321,22 +338,6 @@ public class TimerActivity extends Activity {
         this.pausedWorkMins = this.workMins;
         this.pausedRestSecs = ++this.restSecs;
         this.pausedRestMins = this.restMins;
-    }
-
-    private void createNotification() {
-//        Intent intent = new Intent(this, TimerActivity.class);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-//
-//        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
-//                .setSmallIcon(R.drawable.ic_stat_paused_app)
-//                .setContentTitle("Sample title")
-//                .setContentText("Sample text")
-//                .setAutoCancel(true)
-//                .setContentIntent(pendingIntent);  // Open this activity when the notification is pressed
-//
-//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-//        notificationManager.notify("oneAndOnly", 1, mBuilder.build());
     }
 
     private void endTimer(View view) {
@@ -432,6 +433,10 @@ public class TimerActivity extends Activity {
         }
     }
 
+    private void hideStatusBar() {
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
         super.onCreate(savedInstanceState);
@@ -504,19 +509,17 @@ public class TimerActivity extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        this.hideStatusBar();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
 
         this.createNotification();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (getActionBar() != null) {
-            getActionBar().hide();
-        }
     }
 
     // Methods to continue or pause the timers

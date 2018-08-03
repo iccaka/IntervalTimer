@@ -172,6 +172,10 @@ public class MainActivity extends Activity {
         editor.commit();
     }
 
+    private void hideStatusBar() {
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {  // The things here should happen only once in the activity's entire lifespan
@@ -186,26 +190,29 @@ public class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             this.setTypeFacesToViews();
         }
-
-        this.getSharedPreferences();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        if (getActionBar() != null) {
-            getActionBar().hide();
-        }
-
         this.getSharedPreferences();
         this.updateData();
+
+        this.hideStatusBar();
     }
 
     @SuppressLint("ApplySharedPref")
     @Override
     protected void onPause() {
         super.onPause();
+
+        this.putSharedPreferences();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
 
         this.putSharedPreferences();
     }
