@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
     private Button workPlusBtn;
     private Button restMinusBtn;
     private Button restPlusBtn;
-    //========================================================
+    //=============== =========================================
 
     private boolean isBackPressedTwice;
 
