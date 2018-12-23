@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
@@ -11,6 +13,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.view.View;
 import android.widget.Button;
@@ -79,11 +83,15 @@ public class TimerActivity extends Activity {
 
     private void createNotificationChannel() {
 
+        // if the person's current android version is the same or higher than 'Build.VERSION_CODES.O' a.k.a Oreo...
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
+            // ...create a new notification channel named 'Timer' and with an ID of 'oneAndOnly'
             NotificationChannel channel = new NotificationChannel("oneAndOnly", "Timer", NotificationManager.IMPORTANCE_HIGH);
+            // set a description so the user knows what this specific channel does
             channel.setDescription("Timer");
 
+            // using the 'NotificationManager', if it exists, add the newly created channel
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             if (notificationManager != null) {
                 notificationManager.createNotificationChannel(channel);
@@ -210,38 +218,55 @@ public class TimerActivity extends Activity {
 
     // Methods to properly decrement the parameters when you click on their corresponding buttons
     private void decrementWork(View view) {
+        // if the seconds of the 'work' timer are higher or equal to zero
         if (this.workSecs >= 0) {
+            // if the 'work' seconds are less than or equal to four and if the 'work' minutes are equal to zero
             if (this.workSecs <= 4 && this.workMins == 0) {
+                // start the 'tick' sound which informs us about the 3 last seconds
                 this.mpToTick.start();
             }
+            // decrement the 'work' seconds
             this.workSecs--;
 
+            // if the 'work' seconds are equal to minus one
             if (this.workSecs == -1) {
+                // set the seconds to 59 and decrement the minutes
                 this.workSecs = 59;
                 this.workMins--;
 
+                // if the 'work' minutes are equal to minus one
                 if (this.workMins == -1) {
+                    // seth both of the seconds and the minutes to zero
                     this.workSecs = 0;
                     this.workMins = 0;
                 }
             }
         }
 
+        // finally invoke the custom method 'updateWork' so everything on the screen s up-to-date
         this.updateWork();
     }
 
     private void decrementRest(View view) {
+        // if the seconds of the 'rest' timer are higher or equal to zero
         if (this.restSecs >= 0) {
+            // if the 'rest' seconds are less than or equal to four and if the 'rest' minutes are equal to zero
             if (this.restSecs <= 4 && this.restMins == 0) {
+                // start the 'tick' sound which informs us about the 3 last seconds
                 this.mpToTick.start();
             }
+            // decrement the 'work' seconds
             this.restSecs--;
 
+            // if the 'rest' seconds are equal to minus one
             if (this.restSecs == -1) {
+                // set the seconds to 59 and decrement the minutes
                 this.restSecs = 59;
                 this.restMins--;
 
+                // if the 'rest' minutes are equal to minus one
                 if (this.restMins == -1) {
+                    // seth both of the seconds and the minutes to zero
                     this.restSecs = 0;
                     this.restMins = 0;
                 }
@@ -251,7 +276,7 @@ public class TimerActivity extends Activity {
         this.updateRest();
     }
 
-    private void decrementSets(View view) {
+    private void decrementSets(View view) {  // A super simple method which just decrements the sets
         this.sets--;
 
         this.updateSets();
@@ -303,37 +328,39 @@ public class TimerActivity extends Activity {
     //========================================================
 
     private void createNotification() {
-//        Intent intent = new Intent(this, TimerActivity.class);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-//
-//        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
-//                .setSmallIcon(R.drawable.ic_stat_paused_app)
-//                .setContentTitle("Sample title")
-//                .setContentText("Sample text")
-//                .setAutoCancel(true)
-//                .setContentIntent(pendingIntent);  // Open this activity when the notification is pressed
-//
-//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-//        notificationManager.notify("oneAndOnly", 1, mBuilder.build());
+
+        // TODO learn about notification creation via the android developers website; redo the work here and add appropriate comments to the code
+
+        Intent intent = new Intent(this, TimerActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "oneAndOnly")
+                .setSmallIcon(R.drawable.ic_stat_paused_app)
+                .setContentTitle("Sample title")
+                .setContentText("Sample text")
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent);  // Open this activity when the notification is pressed
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify("oneAndOnly", 1, mBuilder.build());
     }
 
-    private void updateCurrentWithStartingFields() {
+    private void updateCurrentWithStartingFields() {  // A method that just assigns the starting values of the parameters to the parameters
         this.workSecs = this.startingWorkSecs;
         this.workMins = this.startingWorkMins;
         this.restSecs = this.startingRestSecs;
         this.restMins = this.startingRestMins;
     }
 
-    private void updateStartingWithCurrentFields() {
-        // assign the proper values to the 'starting' parameters, so we always know from where we've started
+    private void updateStartingWithCurrentFields() {  // A method that assigns proper values to the 'starting' parameters, so we always know from where we've started
         this.startingWorkSecs = this.workSecs;
         this.startingWorkMins = this.workMins;
         this.startingRestSecs = this.restSecs;
         this.startingRestMins = this.restMins;
     }
 
-    private void updatePausedFields() {
+    private void updatePausedFields() {  // A method that gets invoked once we pause any of the timers and just reassigns the values to the parameters
         this.pausedWorkSecs = ++this.workSecs;
         this.pausedWorkMins = this.workMins;
         this.pausedRestSecs = ++this.restSecs;
@@ -341,26 +368,29 @@ public class TimerActivity extends Activity {
     }
 
     private void endTimer(View view) {
-
         // we stop the timers, no matter who is currently working
         this.stopCurrentTimer();
 
         // start the proper sound so we know when it has ended a.k.a feedback
         this.mpToEnd.start();
 
+        // end the timer by calling the super method 'onBackPressed' which handles the situation just fine
         super.onBackPressed();
-
     }
 
     private void endTimerAfterCompletion() {
+        // start the appropriate sound file, so the user knows that the current workout has been successfully completed
         this.mpToFullyEnd.start();
 
+        // we even create a 'Toast' for the user, so he/she knows that everything is completely done
         Toast.makeText(this.getApplicationContext(), "Workout done!", Toast.LENGTH_SHORT).show();
 
+        // end the timer by calling the super method 'onBackPressed' which handles the situation just fine
         super.onBackPressed();
     }
 
     private void stopCurrentTimer() {
+        // stop the currently working timer
         if (this.isWorkOn) {
             this.workCountDownTimer.cancel();
         } else {
@@ -368,7 +398,7 @@ public class TimerActivity extends Activity {
         }
     }
 
-    private void assignDefaultBooleanValues() { // initializes the booleans with their default values
+    private void assignDefaultBooleanValues() { // This method initializes the booleans with their default values
         this.isWorkOn = true;
         this.hasRestBeenPaused = false;
         this.hasWorkBeenPaused = false;
@@ -376,15 +406,13 @@ public class TimerActivity extends Activity {
         this.isPauseStateOn = false;
     }
 
-    private void assignDefaultViewVisibilities() {
-        // set a bunch of different visibilities to the views, so we don't see redundant stuff on the screen
+    private void assignDefaultViewVisibilities() {  // This method sets a bunch of different visibilities to the views, so we don't see redundant stuff on the screen
         this.endBtn.setVisibility(View.GONE);
         this.continueBtn.setVisibility(View.GONE);
         this.trainingPausedText.setVisibility(View.GONE);
     }
 
-    private void getViews() {
-        // get the views using 'findViewById' and the 'R' class
+    private void getViews() {  // This method gets all of the views from 'activity_main.xml' using the 'R' class
         this.continueBtn = findViewById(R.id.continueBtn);
         this.pauseBtn = findViewById(R.id.pauseBtn);
         this.endBtn = findViewById(R.id.endBtn);
@@ -396,8 +424,7 @@ public class TimerActivity extends Activity {
         this.trainingPausedText = findViewById(R.id.trainingPausedText);
     }
 
-    private void getSounds() {
-        // get the proper sounds from the 'res/raw' folder and assign them to the corresponding fields
+    private void getSounds() {  // This method gets the proper sounds from the 'res/raw' folder and assign them to the corresponding fields
         this.mpToWork = MediaPlayer.create(this.getApplicationContext(), R.raw.work);
         this.mpToRest = MediaPlayer.create(this.getApplicationContext(), R.raw.rest);
         this.mpToPause = MediaPlayer.create(this.getApplicationContext(), R.raw.pause);
@@ -407,7 +434,7 @@ public class TimerActivity extends Activity {
         this.mpToTick = MediaPlayer.create(this.getApplicationContext(), R.raw.tick);
     }
 
-    private void setTypeFacesToViews() {
+    private void setTypeFacesToViews() {  // This method gets invoked if the user's android version is too low to handle XML fonts, it assigns the font faces manually
         Typeface tf = ResourcesCompat.getFont(getApplicationContext(), R.font.monkey);
         this.continueBtn.setTypeface(tf);
         this.pauseBtn.setTypeface(tf);
@@ -428,12 +455,12 @@ public class TimerActivity extends Activity {
             this.workMins = mainActivityBundle.getInt("workMins");
             this.restSecs = mainActivityBundle.getInt("restSecs") + 1;
             this.restMins = mainActivityBundle.getInt("restMins");
-        } else {  // ... exit the activity
-            this.finish();
+        } else {  // ... exit the activity using the super method 'onBackPressed'
+            super.onBackPressed();
         }
     }
 
-    private void hideStatusBar() {
+    private void hideStatusBar() {  // A method that just hides the status bar for us, so we don't see it
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
 
@@ -519,7 +546,7 @@ public class TimerActivity extends Activity {
     protected void onStop() {
         super.onStop();
 
-        this.createNotification();
+//        this.createNotification();
     }
 
     // Methods to continue or pause the timers
@@ -610,7 +637,7 @@ public class TimerActivity extends Activity {
     // Method invoked once we press the 'back' button on our phones
     @Override
     public void onBackPressed() {
-        // if any of the timers is currently paused, end this activity
+        // if any of the timers are currently paused, end this activity by invoking the custom 'endTimer' method
         if (this.isPauseStateOn) {
             this.endTimer(this.endBtn);
             return;
