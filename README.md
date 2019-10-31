@@ -20,3 +20,9 @@ See also the list of [contributors](https://github.com/iccaka/IntervalTimer/grap
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/iccaka/IntervalTimer/blob/master/LICENSE.md) file for details.
+
+## How To Use
+
+This is a short animation, which shows you how the timer can be started/paused/stopped.
+
+![](intervalTimerUsage.gif)
